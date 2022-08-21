@@ -1,0 +1,159 @@
+from datetime import timedelta
+from typing import Any, Optional, Union
+from uuid import UUID
+
+from anyio.to_thread import run_sync
+from pydantic import BaseConfig, BaseModel
+from pydantic_openapi_schema.v3_1_0 import SecurityScheme
+from starlette.status import HTTP_201_CREATED
+from starlette.types import ASGIApp
+from starlite import MediaType, Response
+from starlite.utils import is_async_callable
+
+from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
+from starlite_jwt_auth.token import Token
+from starlite_jwt_auth.types import RetrieveUserHandler, StoreTokenHandler
+
+
+class JWTAuth(BaseModel):
+    """JWT Authentication Configuration.
+
+    This class is the main entry point to the library and it includes
+    methods to create the middleware, provide login functionality, and
+    create OpenAPI documentation.
+    """
+
+    class Config(BaseConfig):
+        arbitrary_types_allowed = True
+
+    algorithm: str = "HS256"
+    """
+    Algorithm to use for JWT hashing.
+    """
+    auth_header_key: str = "Authorization"
+    """
+    Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
+    """
+    default_token_expiration: timedelta = timedelta(days=1)
+    """
+    The default value for token expiration.
+    """
+    retrieve_user_handler: RetrieveUserHandler
+    """
+    Callable that receives the 'sub' value of a token, which represents the 'subject' of the token (usually a user ID
+    or equivalent value) and returns a 'user' value.
+
+    Notes:
+    - User can be any arbitrary value,
+    - The callable can be sync or async.
+    """
+    store_token_handler: StoreTokenHandler
+    """
+    Callable that receives a 'token' instance and persists its sub value.
+
+    Notes:
+    - Its not important to persist the token as is. What is important is that we would be able to use the 'sub' value of
+        the token to retrieve the desired 'user' datum with the 'retrieve_user_handler' function.
+    """
+
+    token_secret: str
+
+    def middleware(self, app: "ASGIApp") -> "ASGIApp":
+        """Creates a 'JWTAuthenticationMiddleware' based on config values.
+
+        Notes:
+            - this function should be passed as is to Starlite or one of its layers 'middleware' kwargs.
+
+        Args:
+            app: An ASGIApp, this value is the next ASGI handler to call in the middleware stack.
+
+        Returns:
+            An ASGIApp.
+        """
+        return JWTAuthenticationMiddleware(
+            app=app,
+            retrieve_user_handler=self.retrieve_user_handler,
+            auth_header_key=self.auth_header_key,
+            secret=self.token_secret,
+            algorithm=self.algorithm,
+        )
+
+    async def login(
+        self,
+        identifier: Union[str, UUID],
+        *,
+        response_body: Optional[Any] = None,
+        response_media_type: Union[str, MediaType] = MediaType.JSON,
+        response_status_code: int = HTTP_201_CREATED,
+        token_expiration: Optional[timedelta] = None,
+        token_issuer: Optional[str] = None,
+        token_audience: Optional[str] = None,
+        token_unique_jwt_id: Optional[str] = None,
+    ) -> Response[Any]:
+        """Create a response with a JWT header. Calls the
+        'JWTAuth.store_token_handler' to persist the token 'sub'.
+
+        Args:
+            identifier: Unique identifier of the token subject. Usually this is a user ID or equivalent kind of value.
+            response_body: An optional response body to send.
+            response_media_type: An optional 'Content-Type'. Defaults to 'application/json'.
+            response_status_code: An optional status code for the response. Defaults to '201 Created'.
+            token_expiration: An optional timedelta for the token expiration.
+            token_issuer: An optional value of the token 'iss' field.
+            token_audience: An optional value for the token 'aud' field.
+            token_unique_jwt_id: An optional value for the token 'jti' field.
+
+        Returns:
+            A [Response][starlite.response.Response] instance.
+        """
+        encoded_token = self._create_token(
+            identifier=identifier,
+            token_expiration=token_expiration,
+            token_issuer=token_issuer,
+            token_audience=token_audience,
+            token_unique_jwt_id=token_unique_jwt_id,
+        )
+        return Response(
+            content=response_body,
+            headers={self.auth_header_key: encoded_token},
+            media_type=response_media_type,
+            status_code=response_status_code,
+        )
+
+    async def _create_token(
+        self,
+        identifier: Union[str, UUID],
+        token_expiration: Optional[timedelta] = None,
+        token_issuer: Optional[str] = None,
+        token_audience: Optional[str] = None,
+        token_unique_jwt_id: Optional[str] = None,
+    ) -> str:
+        token = Token(
+            sub=identifier,
+            exp=token_expiration or self.default_token_expiration,
+            iss=token_issuer,
+            aud=token_audience,
+            jti=token_unique_jwt_id,
+        )
+        encoded_token = token.encode(secret=self.token_secret, algorithm=self.algorithm)
+
+        if is_async_callable(self.store_token_handler):
+            await self.store_token_handler(token)
+        else:
+            await run_sync(self.store_token_handler, token)
+
+        return encoded_token
+
+    def create_security_schema(self) -> SecurityScheme:
+        """Creates OpenAPI documentation for the JWT auth schema used.
+
+        Returns:
+            An OpenAPI 3.1 compatible pydantic model instance.
+        """
+        return SecurityScheme(
+            type="http",
+            scheme="Bearer",
+            name=self.auth_header_key,
+            bearerFormat="JWT",
+            description="JWT api-key authentication and authorization.",
+        )
