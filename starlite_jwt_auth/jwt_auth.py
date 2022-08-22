@@ -1,19 +1,16 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from anyio.to_thread import run_sync
 from pydantic import BaseConfig, BaseModel
 from pydantic_openapi_schema.v3_1_0 import SecurityScheme
 from starlette.status import HTTP_201_CREATED
 from starlite import MediaType, Response
-from starlite.utils import is_async_callable
 
 from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
 from starlite_jwt_auth.token import Token
-from starlite_jwt_auth.types import RetrieveUserHandler, StoreTokenHandler
+from starlite_jwt_auth.types import RetrieveUserHandler
 
 if TYPE_CHECKING:
-    from uuid import UUID
 
     from starlette.types import ASGIApp
 
@@ -49,14 +46,6 @@ class JWTAuth(BaseModel):
     Notes:
     - User can be any arbitrary value,
     - The callable can be sync or async.
-    """
-    store_token_handler: StoreTokenHandler
-    """
-    Callable that receives a 'token' instance and persists its sub value.
-
-    Notes:
-    - Its not important to persist the token as is. What is important is that we would be able to use the 'sub' value of
-        the token to retrieve the desired 'user' datum with the 'retrieve_user_handler' function.
     """
 
     token_secret: str
@@ -103,7 +92,7 @@ class JWTAuth(BaseModel):
 
     async def login(
         self,
-        identifier: Union[str, "UUID"],
+        identifier: str,
         *,
         response_body: Optional[Any] = None,
         response_media_type: Union[str, MediaType] = MediaType.JSON,
@@ -129,7 +118,7 @@ class JWTAuth(BaseModel):
         Returns:
             A [Response][starlite.response.Response] instance.
         """
-        encoded_token = self._create_token(
+        encoded_token = self.create_token(
             identifier=identifier,
             token_expiration=token_expiration,
             token_issuer=token_issuer,
@@ -143,9 +132,9 @@ class JWTAuth(BaseModel):
             status_code=response_status_code,
         )
 
-    async def _create_token(
+    def create_token(
         self,
-        identifier: Union[str, "UUID"],
+        identifier: str,
         token_expiration: Optional[timedelta] = None,
         token_issuer: Optional[str] = None,
         token_audience: Optional[str] = None,
@@ -166,16 +155,11 @@ class JWTAuth(BaseModel):
         """
         token = Token(
             sub=identifier,
-            exp=token_expiration or self.default_token_expiration,
+            exp=datetime.utcnow() + (token_expiration or self.default_token_expiration),
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,
         )
         encoded_token = token.encode(secret=self.token_secret, algorithm=self.algorithm)
-
-        if is_async_callable(self.store_token_handler):
-            await self.store_token_handler(token)
-        else:
-            await run_sync(self.store_token_handler, token)
 
         return encoded_token

@@ -38,6 +38,11 @@ python-jose = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+requests = "*"
+pre-commit = "*"
+hypothesis = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
