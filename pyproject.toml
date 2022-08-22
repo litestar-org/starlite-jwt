@@ -3,12 +3,38 @@ name = "starlite-jwt-auth"
 version = "1.0.0"
 description = "A JWT auth toolkit for Starlite"
 authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
+maintainers = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>", "Peter Schutt <peter.github@proton.me>", "Cody Fincher <cody.fincher@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/starlite-api/jwt-auth"
+repository = "https://github.com/starlite-api/jwt-auth"
+documentation = "https://github.com/starlite-api/jwt-auth"
+keywords = ["starlite", "jwt", "auth", "authentication", "middleware"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+]
+include = ["CHANGELOG.md"]
+packages = [
+    { include = "starlite_jwt_auth" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
 starlite = "*"
-python-jose = "^3.3.0"
+python-jose = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
