@@ -25,9 +25,15 @@ include = '\.pyi?$'
 profile = "black"
 multi_line_output = 3
 
+[tool.pylint.DESIGN]
+max-args = 6
+
 [tool.pylint.MESSAGE_CONTROL]
 disable = [
     "line-too-long",
+    "missing-module-docstring",
+    "missing-class-docstring",
+
 ]
 enable = "useless-suppression"
 extension-pkg-allow-list = ["pydantic"]

@@ -1,20 +1,21 @@
 from datetime import timedelta
-from typing import Any, Optional, Tuple, Union
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from anyio.to_thread import run_sync
 from pydantic import BaseConfig, BaseModel
 from pydantic_openapi_schema.v3_1_0 import SecurityScheme
-from starlette.requests import HTTPConnection
 from starlette.status import HTTP_201_CREATED
-from starlette.types import ASGIApp
-from starlite import BaseRouteHandler, MediaType, NotAuthorizedException, Response
-from starlite.types import Guard
+from starlite import MediaType, Response
 from starlite.utils import is_async_callable
 
 from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
 from starlite_jwt_auth.token import Token
 from starlite_jwt_auth.types import RetrieveUserHandler, StoreTokenHandler
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from starlette.types import ASGIApp
 
 
 class JWTAuth(BaseModel):
@@ -32,7 +33,7 @@ class JWTAuth(BaseModel):
     """
     Algorithm to use for JWT hashing.
     """
-    auth_header_key: str = "Authorization"
+    auth_header: str = "Authorization"
     """
     Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
     """
@@ -64,7 +65,6 @@ class JWTAuth(BaseModel):
 
     Notes:
     - This value should be kept as a secret and the standard practice is to inject it into the environment.
-
     """
 
     def create_security_schema(self) -> SecurityScheme:
@@ -76,7 +76,7 @@ class JWTAuth(BaseModel):
         return SecurityScheme(
             type="http",
             scheme="Bearer",
-            name=self.auth_header_key,
+            name=self.auth_header,
             bearerFormat="JWT",
             description="JWT api-key authentication and authorization.",
         )
@@ -94,46 +94,16 @@ class JWTAuth(BaseModel):
             An ASGIApp.
         """
         return JWTAuthenticationMiddleware(
+            algorithm=self.algorithm,
             app=app,
-            auth=self,
+            auth_header=self.auth_header,
+            retrieve_user_handler=self.retrieve_user_handler,
+            token_secret=self.token_secret,
         )
-
-    def create_guard(self) -> Guard:
-        async def guard(connection: HTTPConnection, handler: BaseRouteHandler) -> None:
-            """Guard function that allows Starlite route handler functions to
-            skip authorization by setting the 'opt' key 'skip_jwt_auth' to
-            True.
-
-            Examples:
-                ```python
-                from starlite import get
-
-
-                @get("/", opt={"skip_jwt_auth": True})
-                def my_handler() -> None:
-                    ...
-                ```
-
-            Args:
-                connection: An Starlette HTTPConnection instance.
-                handler: A Starlite route handler class instance.
-
-            Raises:
-                [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is
-                    invalid or user is not found.
-
-            Returns:
-                None
-            """
-            if handler.opt.get("skip_jwt_auth", False):
-                return
-            await self.authenticate(connection=connection)
-
-        return guard
 
     async def login(
         self,
-        identifier: Union[str, UUID],
+        identifier: Union[str, "UUID"],
         *,
         response_body: Optional[Any] = None,
         response_media_type: Union[str, MediaType] = MediaType.JSON,
@@ -168,42 +138,14 @@ class JWTAuth(BaseModel):
         )
         return Response(
             content=response_body,
-            headers={self.auth_header_key: encoded_token},
+            headers={self.auth_header: encoded_token},
             media_type=response_media_type,
             status_code=response_status_code,
         )
 
-    async def authenticate(self, connection: HTTPConnection) -> Tuple[Any, Token]:
-        """
-        Authenticates a connection based on the JWT in the header.
-        Args:
-            connection: An Starlette HTTPConnection instance.
-
-        Returns:
-            A tuple of the 'user' data and the token instance.
-        """
-        auth_header = connection.headers.get(self.auth_header_key)
-        if not auth_header:
-            raise NotAuthorizedException("JWT not found in request header")
-
-        token = Token.decode(
-            encoded_token=auth_header,
-            secret=self.token_secret,
-            algorithm=self.algorithm,
-        )
-        if is_async_callable(self.store_token_handler):
-            user = await self.retrieve_user_handler(token.sub)
-        else:
-            user = await run_sync(self.retrieve_user_handler, token.sub)
-
-        if not user:
-            raise NotAuthorizedException()
-
-        return user, token
-
     async def _create_token(
         self,
-        identifier: Union[str, UUID],
+        identifier: Union[str, "UUID"],
         token_expiration: Optional[timedelta] = None,
         token_issuer: Optional[str] = None,
         token_audience: Optional[str] = None,
