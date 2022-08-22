@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING
+import re
+from typing import TYPE_CHECKING, List, Optional, Pattern, Union
 
 from starlite import (
     AbstractAuthenticationMiddleware,
@@ -11,7 +12,7 @@ from starlite_jwt_auth.token import Token
 
 if TYPE_CHECKING:  # pragma: no cover
     from starlette.requests import HTTPConnection
-    from starlette.types import ASGIApp
+    from starlette.types import ASGIApp, Receive, Scope, Send
 
     from starlite_jwt_auth.types import RetrieveUserHandler
 
@@ -24,6 +25,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         auth_header: str,
         retrieve_user_handler: "RetrieveUserHandler",
         token_secret: str,
+        exclude: Optional[Union[str, List[str]]],
     ):
         """This Class is a Starlite compatible JWT authentication middleware.
 
@@ -37,12 +39,34 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             token_secret: Secret for decoding the JWT token. This value should be equivalent to the secret used to encode it.
             auth_header: Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
             algorithm: JWT hashing algorithm to use.
+            exclude: A pattern or list of patterns to skip.
         """
         super().__init__(app)
         self.algorithm = algorithm
         self.auth_header = auth_header
         self.retrieve_user_handler = AsyncCallable(retrieve_user_handler)
         self.token_secret = token_secret
+
+        self.exclude: Optional[Pattern[str]] = None
+        if exclude:
+            self.exclude = re.compile("|".join(exclude)) if isinstance(exclude, list) else re.compile(exclude)
+
+    async def __call__(self, scope: "Scope", receive: "Receive", send: "Send") -> None:
+        """Override of the call method to allow skipping endpoints based on
+        path regex matches.
+
+        Args:
+            scope: The ASGI connection scope.
+            receive: The ASGI receive function.
+            send: The ASGI send function.
+
+        Returns:
+            None
+        """
+        if self.exclude and self.exclude.findall(scope["path"]):
+            await self.app(scope, receive, send)
+        else:
+            await super().__call__(scope, receive, send)
 
     async def authenticate_request(self, request: "HTTPConnection") -> AuthenticationResult:
         """Given an HTTP Connection, parse the JWT api key stored in the header

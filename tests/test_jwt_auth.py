@@ -1,6 +1,6 @@
 import string
 from datetime import timedelta
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import pytest
 from hypothesis import given
@@ -101,3 +101,34 @@ async def test_jwt_auth(
 
         response = client.get("/my-endpoint", headers={auth_header: encoded_token})
         assert response.status_code == HTTP_200_OK
+
+
+async def test_path_exclusion() -> None:
+    async def retrieve_user_handler(_: str) -> None:
+        return None
+
+    jwt_auth = JWTAuth(token_secret="abc123", retrieve_user_handler=retrieve_user_handler, exclude=["north", "south"])
+
+    @get("/north/{value:int}")
+    def north_handler(value: int) -> Dict[str, int]:
+        return {"value": value}
+
+    @get("/south")
+    def south_handler() -> None:
+        return None
+
+    @get("/west")
+    def west_handler() -> None:
+        return None
+
+    with create_test_client(
+        route_handlers=[north_handler, south_handler, west_handler], middleware=[jwt_auth.create_middleware]
+    ) as client:
+        response = client.get("/north/1")
+        assert response.status_code == HTTP_200_OK
+
+        response = client.get("/south")
+        assert response.status_code == HTTP_200_OK
+
+        response = client.get("/west")
+        assert response.status_code == HTTP_401_UNAUTHORIZED

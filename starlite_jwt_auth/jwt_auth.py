@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from pydantic import BaseConfig, BaseModel
 from pydantic_openapi_schema.v3_1_0 import SecurityScheme
@@ -54,6 +54,10 @@ class JWTAuth(BaseModel):
     Notes:
     - This value should be kept as a secret and the standard practice is to inject it into the environment.
     """
+    exclude: Optional[Union[str, List[str]]] = None
+    """
+    A pattern or list of patterns to skip in the authentication middleware.
+    """
 
     def create_security_schema(self) -> SecurityScheme:
         """Creates OpenAPI documentation for the JWT auth schema used.
@@ -87,6 +91,7 @@ class JWTAuth(BaseModel):
             auth_header=self.auth_header,
             retrieve_user_handler=self.retrieve_user_handler,
             token_secret=self.token_secret,
+            exclude=self.exclude,
         )
 
     async def login(
