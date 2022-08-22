@@ -10,7 +10,7 @@ from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
 from starlite_jwt_auth.token import Token
 from starlite_jwt_auth.types import RetrieveUserHandler
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
 
     from starlette.types import ASGIApp
 
@@ -47,7 +47,6 @@ class JWTAuth(BaseModel):
     - User can be any arbitrary value,
     - The callable can be sync or async.
     """
-
     token_secret: str
     """
     Key with which to generate the token hash.

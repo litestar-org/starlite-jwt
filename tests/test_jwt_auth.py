@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers, none, one_of, sampled_from, text, timedeltas
+from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from starlite import Request, Response, get
 from starlite.testing import create_test_client
 
@@ -68,10 +69,8 @@ async def test_jwt_auth(
     @get("/my-endpoint", middleware=[jwt_auth.create_middleware])
     def my_handler(request: Request["User", Token]) -> None:
         assert request.user
-        assert request.user.name == user.name
-        assert request.user.id == user.id
-        assert request.auth
-        assert request.auth.sub == user.id
+        assert request.user.dict() == user.dict()
+        assert request.auth.sub == str(user.id)
 
     @get("/login")
     async def login_handler() -> Response["User"]:
@@ -96,3 +95,9 @@ async def test_jwt_auth(
         assert decoded_token.iss == token_issuer
         assert decoded_token.aud == token_audience
         assert decoded_token.jti == token_unique_jwt_id
+
+        response = client.get("/my-endpoint")
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+        response = client.get("/my-endpoint", headers={auth_header: encoded_token})
+        assert response.status_code == HTTP_200_OK

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 from jose import JWTError, jwt
 from pydantic import BaseModel, Field, ValidationError, validator
@@ -22,24 +22,6 @@ class Token(BaseModel):
     """Audience - intended audience."""
     jti: Optional[str] = None
     """JWT ID - a unique identifier of the JWT between different issuers."""
-
-    @validator("sub", always=True)
-    def validate_sub(cls, value: Any) -> str:  # pylint: disable=no-self-argument
-        """Ensures that the 'sub' value is a string.
-
-        Args:
-            value: A value for the 'sub' field that is or can be converted to a string.
-
-        Raises:
-            ValueError: if the value does not support the '__str__' method.
-
-        Returns:
-            The value converted to a string.
-        """
-        try:
-            return str(value)
-        except TypeError as e:
-            raise ValueError("sub value must support the '__str__' method") from e
 
     @validator("exp", always=True)
     def validate_exp(cls, value: datetime) -> datetime:  # pylint: disable=no-self-argument

@@ -89,14 +89,6 @@ no-docstring-rgx="(__.*__|main|test.*|.*test|.*Test|^_.*)$"
 [tool.coverage.run]
 omit = ["*/tests/*"]
 
-[tool.coverage.report]
-exclude_lines = [
-    'pragma: no cover',
-    'if TYPE_CHECKING:',
-    'except ImportError as e:',
-    '\.\.\.'
-]
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 

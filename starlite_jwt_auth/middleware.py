@@ -9,7 +9,7 @@ from starlite.utils import AsyncCallable
 
 from starlite_jwt_auth.token import Token
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from starlette.requests import HTTPConnection
     from starlette.types import ASGIApp
 
