@@ -66,15 +66,15 @@ async def test_jwt_auth(
         retrieve_user_handler=retrieve_user_handler,
     )
 
-    @get("/my-endpoint", middleware=[jwt_auth.create_middleware])
+    @get("/my-endpoint", middleware=[jwt_auth.middleware])
     def my_handler(request: Request["User", Token]) -> None:
         assert request.user
         assert request.user.dict() == user.dict()
         assert request.auth.sub == str(user.id)
 
     @get("/login")
-    async def login_handler() -> Response["User"]:
-        response = await jwt_auth.login(
+    def login_handler() -> Response["User"]:
+        response = jwt_auth.login(
             identifier=str(user.id),
             response_body=user,
             response_status_code=response_status_code,
@@ -122,7 +122,7 @@ async def test_path_exclusion() -> None:
         return None
 
     with create_test_client(
-        route_handlers=[north_handler, south_handler, west_handler], middleware=[jwt_auth.create_middleware]
+        route_handlers=[north_handler, south_handler, west_handler], middleware=[jwt_auth.middleware]
     ) as client:
         response = client.get("/north/1")
         assert response.status_code == HTTP_200_OK

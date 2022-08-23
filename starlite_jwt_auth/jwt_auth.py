@@ -1,18 +1,14 @@
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from pydantic import BaseConfig, BaseModel
 from pydantic_openapi_schema.v3_1_0 import SecurityScheme
 from starlette.status import HTTP_201_CREATED
-from starlite import MediaType, Response
+from starlite import DefineMiddleware, MediaType, Response
 
 from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
 from starlite_jwt_auth.token import Token
 from starlite_jwt_auth.types import RetrieveUserHandler
-
-if TYPE_CHECKING:  # pragma: no cover
-
-    from starlette.types import ASGIApp
 
 
 class JWTAuth(BaseModel):
@@ -59,7 +55,8 @@ class JWTAuth(BaseModel):
     A pattern or list of patterns to skip in the authentication middleware.
     """
 
-    def create_security_schema(self) -> SecurityScheme:
+    @property
+    def security_schema(self) -> SecurityScheme:
         """Creates OpenAPI documentation for the JWT auth schema used.
 
         Returns:
@@ -73,28 +70,24 @@ class JWTAuth(BaseModel):
             description="JWT api-key authentication and authorization.",
         )
 
-    def create_middleware(self, app: "ASGIApp") -> "ASGIApp":
-        """Creates a 'JWTAuthenticationMiddleware' based on config values.
-
-        Notes:
-            - this function should be passed as is to Starlite or one of its layers 'middleware' kwargs.
-
-        Args:
-            app: An ASGIApp, this value is the next ASGI handler to call in the middleware stack.
+    @property
+    def middleware(self) -> DefineMiddleware:
+        """Creates `JWTAuthenticationMiddleware` wrapped in Starlite's
+        `DefineMiddleware`.
 
         Returns:
-            An ASGIApp.
+            An instance of [DefineMiddleware][starlite.middleware.base.DefineMiddleware].
         """
-        return JWTAuthenticationMiddleware(
+        return DefineMiddleware(
+            JWTAuthenticationMiddleware,
             algorithm=self.algorithm,
-            app=app,
             auth_header=self.auth_header,
             retrieve_user_handler=self.retrieve_user_handler,
             token_secret=self.token_secret,
             exclude=self.exclude,
         )
 
-    async def login(
+    def login(
         self,
         identifier: str,
         *,
