@@ -32,7 +32,7 @@ headers = ["Authorization", "X-API-Key"]
     default_token_expiration=timedeltas(min_value=timedelta(seconds=30), max_value=timedelta(weeks=1)),
     token_secret=text(min_size=10),
     response_status_code=integers(min_value=200, max_value=201),
-    token_expiration=timedeltas(min_value=timedelta(seconds=1), max_value=timedelta(weeks=1)),
+    token_expiration=timedeltas(min_value=timedelta(seconds=30), max_value=timedelta(weeks=1)),
     token_issuer=one_of(none(), text(max_size=256)),
     token_audience=one_of(none(), text(max_size=256, alphabet=string.ascii_letters)),
     token_unique_jwt_id=one_of(none(), text(max_size=256)),
