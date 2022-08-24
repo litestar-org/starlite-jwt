@@ -1,5 +1,7 @@
 site_name: starlite-jwt
-repo_url: https://github.com/starlite-jwt/starlite-jwt
+repo_url: https://github.com/starlite-api/starlite-jwt
+repo_name: starlite-api/starlite-jwt
+site_url: https://starlite-api.github.io/starlit-jwt
 nav:
   - index.md
   - Reference: reference/
