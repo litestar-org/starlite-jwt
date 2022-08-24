@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.10"
       - run: >
-          pip install mkdocs-material 
-          black 
+          pip install mkdocs-material
+          black
           mkdocstrings[python]
           mkdocs-gen-files
           mkdocs-literate-nav
