@@ -9,7 +9,7 @@ readme = "README.md"
 homepage = "https://github.com/starlite-api/jwt-auth"
 repository = "https://github.com/starlite-api/jwt-auth"
 documentation = "https://github.com/starlite-api/jwt-auth"
-keywords = ["starlite", "jwt", "auth", "authentication", "middleware"]
+keywords = ["starlite", "jwt", "jwt-token", "jwt-auth", "jwt-authentication", "auth", "authentication", "middleware", "token", "apitoken"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",

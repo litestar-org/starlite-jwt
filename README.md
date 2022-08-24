@@ -21,6 +21,8 @@
 
 This library offers simple JWT authentication for [Starlite](https://github.com/starlite-api/starlite).
 
+Checkout [the docs 📚](https://starlite-api.github.io/starlite-jwt/).
+
 ## Installation
 
 ```shell
