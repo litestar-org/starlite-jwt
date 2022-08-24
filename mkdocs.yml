@@ -1,0 +1,52 @@
+site_name: starlite-jwt
+repo_url: https://github.com/starlite-jwt/starlite-jwt
+nav:
+  - index.md
+  - Reference: reference/
+watch:
+  - starlite_jwt
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - navigation.expand
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
+markdown_extensions:
+  - admonition
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.snippets
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          import:
+          - https://docs.python.org/3/objects.inv
+          - https://starlite-api.github.io/starlite/objects.inv
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: yes
+            line_length: 100
+            merge_init_into_class: yes
+            separate_signature: yes
+            show_source: no
+            show_root_full_path: no
+            show_root_toc_entry: no
+  - autorefs

@@ -4,7 +4,8 @@ from typing import Any, List, Optional, Union
 from pydantic import BaseConfig, BaseModel
 from pydantic_openapi_schema.v3_1_0 import SecurityScheme
 from starlette.status import HTTP_201_CREATED
-from starlite import DefineMiddleware, MediaType, Response
+from starlite import DefineMiddleware, Response
+from starlite.enums import MediaType
 
 from starlite_jwt.middleware import JWTAuthenticationMiddleware
 from starlite_jwt.token import Token
