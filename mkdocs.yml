@@ -41,6 +41,7 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.snippets
+  - pymdownx.superfences
 extra:
   social:
     - icon: fontawesome/brands/discord
