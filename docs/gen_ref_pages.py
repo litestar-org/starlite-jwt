@@ -4,7 +4,6 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-excluded_parts = {"starlite_jwt", "__main__"}
 nav = mkdocs_gen_files.Nav()  # type: ignore[attr-defined]
 
 for path in sorted(Path("starlite_jwt").rglob("*.py")):  #

@@ -43,6 +43,7 @@ pytest-cov = "*"
 requests = "*"
 pre-commit = "*"
 hypothesis = "*"
+mkdocs-gen-files = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
