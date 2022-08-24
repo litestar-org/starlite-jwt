@@ -8,7 +8,7 @@ from hypothesis import given
 from hypothesis.strategies import datetimes, none, one_of, sampled_from, text
 from starlite import ImproperlyConfiguredException, NotAuthorizedException
 
-from starlite_jwt_auth import Token
+from starlite_jwt import Token
 
 
 @given(

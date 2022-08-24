@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "starlite-jwt-auth"
+name = "starlite-jwt"
 version = "1.0.0"
 description = "A JWT auth toolkit for Starlite"
 authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
@@ -28,7 +28,7 @@ classifiers = [
 ]
 include = ["CHANGELOG.md"]
 packages = [
-    { include = "starlite_jwt_auth" },
+    { include = "starlite_jwt" },
 ]
 
 [tool.poetry.dependencies]

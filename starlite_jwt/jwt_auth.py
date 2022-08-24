@@ -6,15 +6,15 @@ from pydantic_openapi_schema.v3_1_0 import SecurityScheme
 from starlette.status import HTTP_201_CREATED
 from starlite import DefineMiddleware, MediaType, Response
 
-from starlite_jwt_auth.middleware import JWTAuthenticationMiddleware
-from starlite_jwt_auth.token import Token
-from starlite_jwt_auth.types import RetrieveUserHandler
+from starlite_jwt.middleware import JWTAuthenticationMiddleware
+from starlite_jwt.token import Token
+from starlite_jwt.types import RetrieveUserHandler
 
 
 class JWTAuth(BaseModel):
     """JWT Authentication Configuration.
 
-    This class is the main entry point to the library and it includes
+    This class is the main entry point to the library, and it includes
     methods to create the middleware, provide login functionality, and
     create OpenAPI documentation.
     """

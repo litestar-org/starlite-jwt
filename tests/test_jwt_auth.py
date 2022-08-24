@@ -10,7 +10,7 @@ from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from starlite import Request, Response, get
 from starlite.testing import create_test_client
 
-from starlite_jwt_auth import JWTAuth, Token
+from starlite_jwt import JWTAuth, Token
 from tests.conftest import User, UserFactory
 
 if TYPE_CHECKING:
