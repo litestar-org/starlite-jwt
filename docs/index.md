@@ -118,7 +118,7 @@ app = Starlite(
 
 ## Contributing
 
-Starlite and all its official libraries is open to contributions big and small.
+Starlite and all its official libraries are open to contributions big and small.
 
 You can always [join our discord](https://discord.gg/X3FJqy8d2j) server
 or [join our Matrix](https://matrix.to/#/#starlitespace:matrix.org) space to discuss contributions and project
