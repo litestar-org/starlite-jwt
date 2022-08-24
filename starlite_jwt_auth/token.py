@@ -1,10 +1,24 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, cast
 
 from jose import JWTError, jwt
-from pydantic import BaseModel, Field, ValidationError, validator
+from pydantic import BaseModel, Field, ValidationError, constr, validator
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
+
+
+def _normalize_datetime(value: datetime) -> datetime:
+    """Converts the given value into UTC and strips microseconds.
+
+    Args:
+        value: A datetime instance
+
+    Returns:
+        A datetime instance
+    """
+    if value.tzinfo is not None:
+        value.astimezone(timezone.utc)
+    return value.replace(tzinfo=None, microsecond=0)
 
 
 class Token(BaseModel):
@@ -12,9 +26,9 @@ class Token(BaseModel):
 
     exp: datetime
     """Expiration - datetime for token expiration."""
-    iat: datetime = Field(default_factory=datetime.utcnow)
+    iat: datetime = Field(default_factory=lambda: _normalize_datetime(datetime.now()))
     """Issued at - should always be current now."""
-    sub: str
+    sub: constr(min_length=1)  # type: ignore[valid-type]
     """Subject - usually a unique identifier of the user or equivalent entity."""
     iss: Optional[str] = None
     """Issuer - optional unique identifier for the issuer."""
@@ -36,9 +50,29 @@ class Token(BaseModel):
         Returns:
             The validated datetime.
         """
-        if value.timestamp() >= datetime.utcnow().timestamp():
+
+        value = _normalize_datetime(value)
+        if value.timestamp() >= _normalize_datetime(datetime.utcnow()).timestamp():
             return value
         raise ValueError("exp value must be a datetime in the future")
+
+    @validator("iat", always=True)
+    def validate_iat(cls, value: datetime) -> datetime:  # pylint: disable=no-self-argument
+        """Ensures that 'iat' value is a past or current datetime.
+
+        Args:
+            value: A datetime instance.
+
+        Raises:
+            ValueError: if value is not a past or current datetime instance.
+
+        Returns:
+            The validated datetime.
+        """
+        value = _normalize_datetime(value)
+        if value.timestamp() <= _normalize_datetime(datetime.now()).timestamp():
+            return value
+        raise ValueError("iat must be a current or past time")
 
     @staticmethod
     def decode(encoded_token: str, secret: str, algorithm: str) -> "Token":

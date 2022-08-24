@@ -152,7 +152,7 @@ class JWTAuth(BaseModel):
         """
         token = Token(
             sub=identifier,
-            exp=datetime.utcnow() + (token_expiration or self.default_token_expiration),
+            exp=(datetime.now() + (token_expiration or self.default_token_expiration)),
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,

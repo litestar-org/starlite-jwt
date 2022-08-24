@@ -16,19 +16,17 @@ if TYPE_CHECKING:
 
     from starlite.cache import SimpleCacheBackend
 
-algorithms = [
-    "HS256",
-    "HS384",
-    "HS512",
-]
-
-headers = ["Authorization", "X-API-Key"]
-
 
 @pytest.mark.asyncio()
 @given(
-    algorithm=sampled_from(algorithms),
-    auth_header=sampled_from(headers),
+    algorithm=sampled_from(
+        [
+            "HS256",
+            "HS384",
+            "HS512",
+        ]
+    ),
+    auth_header=sampled_from(["Authorization", "X-API-Key"]),
     default_token_expiration=timedeltas(min_value=timedelta(seconds=30), max_value=timedelta(weeks=1)),
     token_secret=text(min_size=10),
     response_status_code=integers(min_value=200, max_value=201),
