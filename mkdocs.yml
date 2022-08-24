@@ -47,6 +47,8 @@ extra:
       link: https://discord.gg/X3FJqy8d2j
     - icon: fontawesome/brands/github
       link: https://github.com/starlite-api/starlite
+extra_css:
+  - css/extra.css
 plugins:
   - search:
       lang: en

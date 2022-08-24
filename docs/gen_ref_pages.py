@@ -1,10 +1,11 @@
 """Generate the code reference pages."""
 
 from pathlib import Path
+
 import mkdocs_gen_files
 
-
-nav = mkdocs_gen_files.Nav()
+excluded_parts = {"starlite_jwt", "__main__"}
+nav = mkdocs_gen_files.Nav()  # type: ignore[attr-defined]
 
 for path in sorted(Path("starlite_jwt").rglob("*.py")):  #
     module_path = Path("starlite_jwt").with_suffix("")
@@ -13,12 +14,12 @@ for path in sorted(Path("starlite_jwt").rglob("*.py")):  #
 
     parts = module_path.parts
 
+    if parts[-1] == "__main__":
+        continue
     if parts[-1] == "__init__":
         parts = parts[:-1]
         doc_path = doc_path.with_name("index.md")
         full_doc_path = full_doc_path.with_name("index.md")
-    elif parts[-1] == "__main__":
-        continue
 
     nav[parts] = doc_path.as_posix()
 
