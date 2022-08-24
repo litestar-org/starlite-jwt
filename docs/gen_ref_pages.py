@@ -1,15 +1,14 @@
 """Generate the code reference pages."""
 
 from pathlib import Path
-
 import mkdocs_gen_files
+
 
 nav = mkdocs_gen_files.Nav()
 
 for path in sorted(Path("starlite_jwt").rglob("*.py")):  #
     module_path = Path("starlite_jwt").with_suffix("")
     doc_path = Path("starlite_jwt").with_suffix(".md")
-    print(f"{doc_path = }")  # noqa:T201
     full_doc_path = Path("reference", doc_path)
 
     parts = module_path.parts

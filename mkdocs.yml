@@ -9,6 +9,21 @@ watch:
   - starlite_jwt
 theme:
   name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: mirage
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: mirage-light
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+  favicon: images/starlite-favicon.ico
+  logo: images/starlite-icon@2x.png
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.instant
     - navigation.tracking
@@ -26,8 +41,15 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.snippets
+extra:
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/X3FJqy8d2j
+    - icon: fontawesome/brands/github
+      link: https://github.com/starlite-api/starlite
 plugins:
-  - search
+  - search:
+      lang: en
   - gen-files:
       scripts:
         - docs/gen_ref_pages.py

@@ -1,4 +1,4 @@
-# Starlite JWT Auth
+# Starlite JWT
 
 <!-- markdownlint-disable -->
 <img alt="Starlite logo" src="./starlite-banner.svg" width="100%" height="auto">
