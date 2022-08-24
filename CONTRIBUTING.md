@@ -11,6 +11,8 @@ To contribute code changes or update the documentation, please follow these step
 5. Create a pull request to the main repository with an explanation of your changes. The PR should detail the
    contribution and link to any related issues - if existing.
 
+## Docs
+
 ### Docs Theme and Appearance
 
 We welcome contributions that enhance / improve the appearance and usability of the docs, as well as any images, icons
@@ -38,4 +40,3 @@ restructure the docs etc. But make sure to follow these emphases:
 - examples should be simple and clear.
 - provide links where applicable.
 - provide diagrams where applicable and possible.
-

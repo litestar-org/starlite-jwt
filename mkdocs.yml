@@ -37,8 +37,8 @@ plugins:
         python:
           paths: [src]
           import:
-          - https://docs.python.org/3/objects.inv
-          - https://starlite-api.github.io/starlite/objects.inv
+            - https://docs.python.org/3/objects.inv
+            - https://starlite-api.github.io/starlite/objects.inv
           options:
             docstring_style: google
             docstring_options:
