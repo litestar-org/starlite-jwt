@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional, cast
 
-from jose import JWTError, jwt
+from jose import JWSError, JWTError, jwt
 from pydantic import BaseModel, Field, ValidationError, constr, validator
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
@@ -110,5 +110,5 @@ class Token(BaseModel):
         """
         try:
             return cast("str", jwt.encode(claims=self.dict(exclude_none=True), key=secret, algorithm=algorithm))
-        except JWTError as e:
+        except (JWTError, JWSError) as e:
             raise ImproperlyConfiguredException("Failed to encode token") from e

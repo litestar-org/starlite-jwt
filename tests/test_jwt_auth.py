@@ -1,6 +1,7 @@
 import string
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Dict, Optional
+from uuid import uuid4
 
 import pytest
 from hypothesis import given
@@ -42,7 +43,7 @@ async def test_jwt_auth(
     default_token_expiration: timedelta,
     token_secret: str,
     response_status_code: int,
-    token_expiration: Optional[timedelta],
+    token_expiration: timedelta,
     token_issuer: Optional[str],
     token_audience: Optional[str],
     token_unique_jwt_id: Optional[str],
@@ -51,9 +52,8 @@ async def test_jwt_auth(
 
     await mock_db.set(str(user.id), user, 120)
 
-    async def retrieve_user_handler(sub: str) -> "User":
+    async def retrieve_user_handler(sub: str) -> Optional["User"]:
         stored_user = await mock_db.get(sub)
-        assert stored_user
         return stored_user
 
     jwt_auth = JWTAuth(
@@ -99,6 +99,20 @@ async def test_jwt_auth(
 
         response = client.get("/my-endpoint", headers={auth_header: encoded_token})
         assert response.status_code == HTTP_200_OK
+
+        response = client.get("/my-endpoint", headers={auth_header: uuid4().hex})
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+        fake_token = Token(
+            sub=uuid4().hex,
+            iss=token_issuer,
+            aud=token_audience,
+            jti=token_unique_jwt_id,
+            exp=datetime.now() + token_expiration,
+        ).encode(secret=token_secret, algorithm=algorithm)
+
+        response = client.get("/my-endpoint", headers={auth_header: fake_token})
+        assert response.status_code == HTTP_401_UNAUTHORIZED
 
 
 async def test_path_exclusion() -> None:
