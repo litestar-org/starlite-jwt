@@ -80,7 +80,7 @@ repos:
     rev: "v2.14.5"
     hooks:
       - id: pylint
-        exclude: "test_*"
+        exclude: "test_*|docs"
         args: ["--unsafe-load-any-extension=y"]
         additional_dependencies: [starlite, python-jose]
   - repo: https://github.com/pre-commit/mirrors-mypy
