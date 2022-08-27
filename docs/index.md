@@ -106,7 +106,12 @@ def some_route_handler(request: Request[User, Token]) -> Any:
 
 
 # We add the jwt security schema to the OpenAPI config.
-openapi_config = OpenAPIConfig(security=[jwt_auth.openapi_components])
+openapi_config = OpenAPIConfig(    
+    components=[jwt_auth.openapi_components],
+    security=[jwt_auth.security_requirement],
+    # exclude any URLs that should not have authentication.  We exclude the documentation URLs here.
+    exclude=["/schema"],
+)
 
 # We initialize the app instance, passing to it the 'jwt_auth.middleware' and the 'openapi_config'.
 app = Starlite(
