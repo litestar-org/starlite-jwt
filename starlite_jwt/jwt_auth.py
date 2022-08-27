@@ -2,7 +2,11 @@ from datetime import datetime, timedelta
 from typing import Any, List, Optional, Union
 
 from pydantic import BaseConfig, BaseModel
-from pydantic_openapi_schema.v3_1_0 import SecurityScheme
+from pydantic_openapi_schema.v3_1_0 import (
+    Components,
+    SecurityRequirement,
+    SecurityScheme,
+)
 from starlette.status import HTTP_201_CREATED
 from starlite import DefineMiddleware, Response
 from starlite.enums import MediaType
@@ -55,21 +59,37 @@ class JWTAuth(BaseModel):
     """
     A pattern or list of patterns to skip in the authentication middleware.
     """
+    openapi_security_scheme_name: str = "BearerToken"
+    """
+    The value to use for the OpenAPI security scheme and security requirements
+    """
 
     @property
-    def security_schema(self) -> SecurityScheme:
+    def openapi_components(self) -> Components:
         """Creates OpenAPI documentation for the JWT auth schema used.
 
         Returns:
-            An pydantic model instance representing an OpenAPI 3.1 SecuritySchema.
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
         """
-        return SecurityScheme(
-            type="http",
-            scheme="Bearer",
-            name=self.auth_header,
-            bearerFormat="JWT",
-            description="JWT api-key authentication and authorization.",
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="http",
+                    scheme="Bearer",
+                    name=self.auth_header,
+                    bearerFormat="JWT",
+                    description="JWT api-key authentication and authorization.",
+                )
+            }
         )
+
+    @property
+    def security_requirement(self) -> SecurityRequirement:
+        """
+        Returns:
+            An OpenAPI 3.1 [SecurityRequirement][pydantic_schema_pydantic.v3_1_0.security_requirement.SecurityRequirement] dictionary.
+        """
+        return {self.openapi_security_scheme_name: []}
 
     @property
     def middleware(self) -> DefineMiddleware:

@@ -146,15 +146,17 @@ async def test_path_exclusion() -> None:
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
 
-def test_security_schema() -> None:
+def test_openapi() -> None:
     jwt_auth = JWTAuth(token_secret="abc123", retrieve_user_handler=lambda _: None)
-    assert jwt_auth.security_schema.dict() == {
-        "bearerFormat": "JWT",
-        "description": "JWT api-key authentication and authorization.",
-        "flows": None,
-        "name": "Authorization",
-        "openIdConnectUrl": None,
-        "scheme": "Bearer",
-        "security_scheme_in": None,
-        "type": "http",
+    assert jwt_auth.openapi_components.dict(exclude_none=True) == {
+        "securitySchemes": {
+            "BearerToken": {
+                "type": "http",
+                "description": "JWT api-key authentication and authorization.",
+                "name": "Authorization",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT",
+            }
+        }
     }
+    assert jwt_auth.security_requirement == {"BearerToken": []}
