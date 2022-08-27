@@ -1,7 +1,7 @@
 site_name: starlite-jwt
 repo_url: https://github.com/starlite-api/starlite-jwt
 repo_name: starlite-api/starlite-jwt
-site_url: https://starlite-api.github.io/starlit-jwt
+site_url: https://starlite-api.github.io/starlite-jwt
 nav:
   - index.md
   - Reference: reference/
@@ -41,12 +41,13 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.snippets
+  - pymdownx.superfences
 extra:
   social:
     - icon: fontawesome/brands/discord
       link: https://discord.gg/X3FJqy8d2j
     - icon: fontawesome/brands/github
-      link: https://github.com/starlite-api/starlite
+      link: https://github.com/starlite-api/starlite-jwt
 extra_css:
   - css/extra.css
 plugins:
