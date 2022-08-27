@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import Optional, cast
+from typing import Dict, Optional, Union, cast
 
 from jose import JWSError, JWTError, jwt
-from pydantic import BaseModel, Field, ValidationError, constr, validator
+from pydantic import BaseModel, Extra, Field, ValidationError, constr, validator
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
 
@@ -21,12 +21,12 @@ def _normalize_datetime(value: datetime) -> datetime:
     return value.replace(tzinfo=None, microsecond=0)
 
 
-class Token(BaseModel):
+class Token(BaseModel, extra=Extra.allow):
     """This class represents a JWT token."""
 
     exp: datetime
     """Expiration - datetime for token expiration."""
-    iat: datetime = Field(default_factory=lambda: _normalize_datetime(datetime.now()))
+    iat: datetime = Field(default_factory=lambda: _normalize_datetime(datetime.utcnow()))
     """Issued at - should always be current now."""
     sub: constr(min_length=1)  # type: ignore[valid-type]
     """Subject - usually a unique identifier of the user or equivalent entity."""
@@ -70,17 +70,18 @@ class Token(BaseModel):
             The validated datetime.
         """
         value = _normalize_datetime(value)
-        if value.timestamp() <= _normalize_datetime(datetime.now()).timestamp():
+        if value.timestamp() <= _normalize_datetime(datetime.utcnow()).timestamp():
             return value
         raise ValueError("iat must be a current or past time")
 
     @staticmethod
-    def decode(encoded_token: str, secret: str, algorithm: str) -> "Token":
+    def decode(encoded_token: str, secret: Union[str, Dict[str, str]], algorithm: str) -> "Token":
         """Decodes a passed in token string and returns a Token instance.
 
         Args:
             encoded_token: A base64 string containing an encoded JWT.
-            secret: The secret with which the JWT is encoded.
+            secret: The secret with which the JWT is encoded. It may optionally
+            be an individual JWK or JWS set dict
             algorithm: The algorithm used to encode the JWT.
 
         Returns:

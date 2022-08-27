@@ -108,7 +108,7 @@ async def test_jwt_auth(
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,
-            exp=datetime.now() + token_expiration,
+            exp=datetime.utcnow() + token_expiration,
         ).encode(secret=token_secret, algorithm=algorithm)
 
         response = client.get("/my-endpoint", headers={auth_header: fake_token})
