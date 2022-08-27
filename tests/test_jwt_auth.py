@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import integers, none, one_of, sampled_from, text, timedeltas
 from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
-from starlite import Request, Response, get
+from starlite import OpenAPIConfig, Request, Response, Starlite, get
 from starlite.testing import create_test_client
 
 from starlite_jwt import JWTAuth, Token
@@ -160,3 +160,29 @@ def test_openapi() -> None:
         }
     }
     assert jwt_auth.security_requirement == {"BearerToken": []}
+
+    openapi_config = OpenAPIConfig(
+        title="my api",
+        version="1.0.0",
+        components=[jwt_auth.openapi_components],
+        security=[jwt_auth.security_requirement],
+    )
+    app = Starlite(route_handlers=[], openapi_config=openapi_config)
+    assert app.openapi_schema.dict(exclude_none=True) == {  # type: ignore
+        "openapi": "3.1.0",
+        "info": {"title": "my api", "version": "1.0.0"},
+        "servers": [{"url": "/"}],
+        "paths": {},
+        "components": {
+            "securitySchemes": {
+                "BearerToken": {
+                    "type": "http",
+                    "description": "JWT api-key authentication and authorization.",
+                    "name": "Authorization",
+                    "scheme": "Bearer",
+                    "bearerFormat": "JWT",
+                }
+            }
+        },
+        "security": [{"BearerToken": []}],
+    }
