@@ -4,3 +4,7 @@
 .hypothesis/
 __pycache__/
 *.iml
+.venv
+.env
+.vscode
+.python-version

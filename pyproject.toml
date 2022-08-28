@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "starlite-jwt"
-version = "1.0.0"
+version = "1.1.0"
 description = "A JWT auth toolkit for Starlite"
 authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 maintainers = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>", "Peter Schutt <peter.github@proton.me>", "Cody Fincher <cody.fincher@gmail.com>"]
@@ -33,8 +33,9 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
-starlite = "*"
+starlite = ">=1.14.1"
 python-jose = "*"
+cryptography = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

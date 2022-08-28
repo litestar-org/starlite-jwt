@@ -1,5 +1,5 @@
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -35,7 +35,7 @@ def test_token(
 ) -> None:
     token = Token(
         sub=token_sub,
-        exp=(datetime.now() + timedelta(seconds=30)),
+        exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
         aud=token_audience,
         iss=token_issuer,
         jti=token_unique_jwt_id,
@@ -82,14 +82,14 @@ def test_encode_validation(algorithm: str, secret: str) -> None:
     with pytest.raises(ImproperlyConfiguredException):
         Token(
             sub="123",
-            exp=(datetime.now() + timedelta(seconds=30)),
+            exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
         ).encode(algorithm="nope", secret=secret)
 
 
 def test_decode_validation() -> None:
     token = Token(
         sub="123",
-        exp=(datetime.now() + timedelta(seconds=30)),
+        exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
     )
     algorithm = "HS256"
     secret = uuid4().hex

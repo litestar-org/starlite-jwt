@@ -1,5 +1,5 @@
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Dict, Optional
 from uuid import uuid4
 
@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import integers, none, one_of, sampled_from, text, timedeltas
 from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
-from starlite import Request, Response, get
+from starlite import OpenAPIConfig, Request, Response, Starlite, get
 from starlite.testing import create_test_client
 
 from starlite_jwt import JWTAuth, Token
@@ -108,7 +108,7 @@ async def test_jwt_auth(
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,
-            exp=datetime.now() + token_expiration,
+            exp=(datetime.now(timezone.utc) + token_expiration),
         ).encode(secret=token_secret, algorithm=algorithm)
 
         response = client.get("/my-endpoint", headers={auth_header: fake_token})
@@ -146,15 +146,43 @@ async def test_path_exclusion() -> None:
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
 
-def test_security_schema() -> None:
+def test_openapi() -> None:
     jwt_auth = JWTAuth(token_secret="abc123", retrieve_user_handler=lambda _: None)
-    assert jwt_auth.security_schema.dict() == {
-        "bearerFormat": "JWT",
-        "description": "JWT api-key authentication and authorization.",
-        "flows": None,
-        "name": "Authorization",
-        "openIdConnectUrl": None,
-        "scheme": "Bearer",
-        "security_scheme_in": None,
-        "type": "http",
+    assert jwt_auth.openapi_components.dict(exclude_none=True) == {
+        "securitySchemes": {
+            "BearerToken": {
+                "type": "http",
+                "description": "JWT api-key authentication and authorization.",
+                "name": "Authorization",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    }
+    assert jwt_auth.security_requirement == {"BearerToken": []}
+
+    openapi_config = OpenAPIConfig(
+        title="my api",
+        version="1.0.0",
+        components=[jwt_auth.openapi_components],
+        security=[jwt_auth.security_requirement],
+    )
+    app = Starlite(route_handlers=[], openapi_config=openapi_config)
+    assert app.openapi_schema.dict(exclude_none=True) == {  # type: ignore
+        "openapi": "3.1.0",
+        "info": {"title": "my api", "version": "1.0.0"},
+        "servers": [{"url": "/"}],
+        "paths": {},
+        "components": {
+            "securitySchemes": {
+                "BearerToken": {
+                    "type": "http",
+                    "description": "JWT api-key authentication and authorization.",
+                    "name": "Authorization",
+                    "scheme": "Bearer",
+                    "bearerFormat": "JWT",
+                }
+            }
+        },
+        "security": [{"BearerToken": []}],
     }
