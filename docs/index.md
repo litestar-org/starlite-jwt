@@ -27,11 +27,7 @@ This library offers simple JWT authentication for [Starlite](https://github.com/
 pip install starlite-jwt
 ```
 
-This library uses the excellent [python-jose](https://github.com/mpdavis/python-jose) library, which supports multiple
-cryptographic backends. You can install either [pyca/cryptography](http://cryptography.io/)
-or [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/), and it will be used as the backend automatically. Note
-that if you want to use a certificate based encryption scheme, you must install one of these backends - please refer to
-the [python-jose](https://github.com/mpdavis/python-jose) readme for more details.
+This library uses the excellent [python-jose](https://github.com/mpdavis/python-jose) library with the [pyca/cryptography](http://cryptography.io/) backend - please refer to the [python-jose](https://github.com/mpdavis/python-jose) readme for more details.
 
 ## Example
 
