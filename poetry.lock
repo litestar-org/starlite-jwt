@@ -152,7 +152,7 @@ idna = ">=2.0.0"
 
 [[package]]
 name = "exceptiongroup"
-version = "1.0.0rc8"
+version = "1.0.0rc9"
 description = "Backport of PEP 654 (exception groups)"
 category = "dev"
 optional = false
@@ -670,7 +670,7 @@ full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests"]
 
 [[package]]
 name = "starlite"
-version = "1.14.1"
+version = "1.14.2"
 description = "Light-weight and flexible ASGI API Framework"
 category = "main"
 optional = false
@@ -707,14 +707,6 @@ description = "A lil' TOML parser"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
-
-[[package]]
-name = "types-python-jose"
-version = "3.3.4"
-description = "Typing stubs for python-jose"
-category = "dev"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "typing-extensions"
@@ -789,7 +781,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<4.0"
-content-hash = "d2cff545889123bdec7baa8158c2f0ea8f731b0381b814ad1862b906601cb52b"
+content-hash = "fc5b9ad866a7a2a6da41356f9a19fa01b8cf492f4fe0576f94d5449fcd6c60bf"
 
 [metadata.files]
 anyio = [
@@ -892,8 +884,8 @@ email-validator = [
     {file = "email_validator-1.2.1.tar.gz", hash = "sha256:6757aea012d40516357c0ac2b1a4c31219ab2f899d26831334c5d069e8b6c3d8"},
 ]
 exceptiongroup = [
-    {file = "exceptiongroup-1.0.0rc8-py3-none-any.whl", hash = "sha256:ab0a968e1ef769e55d9a596f4a89f7be9ffedbc9fdefdb77cc68cf5c33ce1035"},
-    {file = "exceptiongroup-1.0.0rc8.tar.gz", hash = "sha256:6990c24f06b8d33c8065cfe43e5e8a4bfa384e0358be036af9cc60b6321bd11a"},
+    {file = "exceptiongroup-1.0.0rc9-py3-none-any.whl", hash = "sha256:2e3c3fc1538a094aab74fad52d6c33fc94de3dfee3ee01f187c0e0c72aec5337"},
+    {file = "exceptiongroup-1.0.0rc9.tar.gz", hash = "sha256:9086a4a21ef9b31c72181c77c040a074ba0889ee56a7b289ff0afb0d97655f96"},
 ]
 faker = [
     {file = "Faker-14.1.0-py3-none-any.whl", hash = "sha256:067a03f64e555261610e69277536072997b4576dbf84b113faef3c06d85b466b"},
@@ -1208,8 +1200,8 @@ starlette = [
     {file = "starlette-0.20.4.tar.gz", hash = "sha256:42fcf3122f998fefce3e2c5ad7e5edbf0f02cf685d646a83a08d404726af5084"},
 ]
 starlite = [
-    {file = "starlite-1.14.1-py3-none-any.whl", hash = "sha256:f0f82a1af05c2800ed142fdccaad5886815157946fd63d359fddb4728df15f1d"},
-    {file = "starlite-1.14.1.tar.gz", hash = "sha256:e76410d2f51b71a88f5754173a31de9a2162721114373edf72ef266dfd3c61f7"},
+    {file = "starlite-1.14.2-py3-none-any.whl", hash = "sha256:f71b26bfc911e440a5750a8b1f9aeade46b52500523cf92603ef526e086ff7de"},
+    {file = "starlite-1.14.2.tar.gz", hash = "sha256:f31d016adcf85bca09a271bc141712375273ede2a139518c5b09af821bb80b8f"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
@@ -1218,10 +1210,6 @@ toml = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
-]
-types-python-jose = [
-    {file = "types-python-jose-3.3.4.tar.gz", hash = "sha256:a8331dd72da5adf03853d4c003d08d0621dd9eb7b7333571b04d81058c55fac6"},
-    {file = "types_python_jose-3.3.4-py3-none-any.whl", hash = "sha256:04fb427bc906e864e8c313db469920f71ffa85839b43fe355f7dc861330c6da3"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.3.0-py3-none-any.whl", hash = "sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02"},
