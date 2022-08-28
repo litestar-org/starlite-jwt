@@ -1,5 +1,5 @@
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Dict, Optional
 from uuid import uuid4
 
@@ -108,7 +108,7 @@ async def test_jwt_auth(
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,
-            exp=datetime.utcnow() + token_expiration,
+            exp=(datetime.now(timezone.utc) + token_expiration),
         ).encode(secret=token_secret, algorithm=algorithm)
 
         response = client.get("/my-endpoint", headers={auth_header: fake_token})

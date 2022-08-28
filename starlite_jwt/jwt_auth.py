@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, List, Optional, Union
 
 from pydantic import BaseConfig, BaseModel
@@ -173,7 +173,7 @@ class JWTAuth(BaseModel):
         """
         token = Token(
             sub=identifier,
-            exp=(datetime.utcnow() + (token_expiration or self.default_token_expiration)),
+            exp=(datetime.now(timezone.utc) + (token_expiration or self.default_token_expiration)),
             iss=token_issuer,
             aud=token_audience,
             jti=token_unique_jwt_id,

@@ -2,7 +2,15 @@ from datetime import datetime, timezone
 from typing import Dict, Optional, Union, cast
 
 from jose import JWSError, JWTError, jwt
-from pydantic import BaseModel, Extra, Field, ValidationError, constr, validator
+from pydantic import (
+    BaseConfig,
+    BaseModel,
+    Extra,
+    Field,
+    ValidationError,
+    constr,
+    validator,
+)
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
 
@@ -18,15 +26,18 @@ def _normalize_datetime(value: datetime) -> datetime:
     """
     if value.tzinfo is not None:
         value.astimezone(timezone.utc)
-    return value.replace(tzinfo=None, microsecond=0)
+    return value.replace(microsecond=0)
 
 
-class Token(BaseModel, extra=Extra.allow):
+class Token(BaseModel):
     """This class represents a JWT token."""
+
+    class Config(BaseConfig):
+        extra = Extra.allow
 
     exp: datetime
     """Expiration - datetime for token expiration."""
-    iat: datetime = Field(default_factory=lambda: _normalize_datetime(datetime.utcnow()))
+    iat: datetime = Field(default_factory=lambda: _normalize_datetime(datetime.now(timezone.utc)))
     """Issued at - should always be current now."""
     sub: constr(min_length=1)  # type: ignore[valid-type]
     """Subject - usually a unique identifier of the user or equivalent entity."""
@@ -52,7 +63,7 @@ class Token(BaseModel, extra=Extra.allow):
         """
 
         value = _normalize_datetime(value)
-        if value.timestamp() >= _normalize_datetime(datetime.utcnow()).timestamp():
+        if value.timestamp() >= _normalize_datetime(datetime.now(timezone.utc)).timestamp():
             return value
         raise ValueError("exp value must be a datetime in the future")
 
@@ -70,7 +81,7 @@ class Token(BaseModel, extra=Extra.allow):
             The validated datetime.
         """
         value = _normalize_datetime(value)
-        if value.timestamp() <= _normalize_datetime(datetime.utcnow()).timestamp():
+        if value.timestamp() <= _normalize_datetime(datetime.now(timezone.utc)).timestamp():
             return value
         raise ValueError("iat must be a current or past time")
 

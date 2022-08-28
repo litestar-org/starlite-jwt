@@ -1,5 +1,5 @@
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -35,7 +35,7 @@ def test_token(
 ) -> None:
     token = Token(
         sub=token_sub,
-        exp=(datetime.utcnow() + timedelta(seconds=120)),
+        exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
         aud=token_audience,
         iss=token_issuer,
         jti=token_unique_jwt_id,
@@ -82,14 +82,14 @@ def test_encode_validation(algorithm: str, secret: str) -> None:
     with pytest.raises(ImproperlyConfiguredException):
         Token(
             sub="123",
-            exp=(datetime.utcnow() + timedelta(seconds=120)),
+            exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
         ).encode(algorithm="nope", secret=secret)
 
 
 def test_decode_validation() -> None:
     token = Token(
         sub="123",
-        exp=(datetime.utcnow() + timedelta(seconds=120)),
+        exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
     )
     algorithm = "HS256"
     secret = uuid4().hex
@@ -107,21 +107,21 @@ def test_decode_validation() -> None:
         token.decode(encoded_token=encoded_token, algorithm=algorithm, secret=uuid4().hex)
 
 
-@given(exp=datetimes(max_value=datetime.utcnow() - timedelta(seconds=10)))
+@given(exp=datetimes(max_value=datetime.now() - timedelta(seconds=10)))
 def test_exp_validation(exp: datetime) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         Token(
             sub="123",
             exp=exp,
-            iat=(datetime.utcnow() - timedelta(seconds=120)),
+            iat=(datetime.now() - timedelta(seconds=30)),
         )
 
 
-@given(iat=datetimes(min_value=datetime.utcnow() + timedelta(seconds=10)))
+@given(iat=datetimes(min_value=datetime.now() + timedelta(seconds=10)))
 def test_iat_validation(iat: datetime) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         Token(
             sub="123",
             iat=iat,
-            exp=(datetime.utcnow() + timedelta(seconds=120)),
+            exp=(datetime.now() + timedelta(seconds=30)),
         )
