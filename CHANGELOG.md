@@ -9,3 +9,7 @@
 - update `jwt-auth` to have `openapi_components` and `security_requirements` properties that can be used for OpenAPI 3.1 docs generation.
 - Use `cryptography` as `python-jose` backend
 - Adjustments to `Token` model.
+
+[1.1.1]
+
+- update dependencies and adjust `authenticate_request` to Starlite `1.6.0+`

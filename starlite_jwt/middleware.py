@@ -68,12 +68,12 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         else:
             await super().__call__(scope, receive, send)
 
-    async def authenticate_request(self, request: "HTTPConnection") -> AuthenticationResult:
+    async def authenticate_request(self, connection: "HTTPConnection") -> AuthenticationResult:
         """Given an HTTP Connection, parse the JWT api key stored in the header
         and retrieve the user correlating to the token from the DB.
 
         Args:
-            request: An Starlette HTTPConnection instance.
+            connection: An Starlette HTTPConnection instance.
 
         Returns:
             AuthenticationResult
@@ -81,7 +81,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        auth_header = request.headers.get(self.auth_header)
+        auth_header = connection.headers.get(self.auth_header)
         if not auth_header:
             raise NotAuthorizedException("No JWT token found in request header")
 

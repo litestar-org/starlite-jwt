@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: 22.6.0
+    rev: 22.8.0
     hooks:
       - id: black
         args: [--config=./pyproject.toml]
@@ -89,3 +89,9 @@ repos:
       - id: mypy
         additional_dependencies:
           [starlite, python-jose, mkdocs_gen_files, types-python-jose]
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.269
+    hooks:
+      - id: pyright
+        additional_dependencies:
+          [starlite, python-jose, mkdocs_gen_files, pytest, hypothesis]
