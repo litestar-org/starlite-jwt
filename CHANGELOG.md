@@ -13,3 +13,7 @@
 [1.1.1]
 
 - update dependencies and adjust `authenticate_request` to Starlite `1.6.0+`
+
+[1.2.0]
+
+- update implementation for Starlite `1.16.0+` compatibility.
