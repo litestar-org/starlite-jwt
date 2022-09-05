@@ -72,7 +72,7 @@ class JWTAuth(BaseModel):
     @validator("retrieve_user_handler")
     def validate_retrieve_user_handler(  # pylint: disable=no-self-argument
         cls, value: RetrieveUserHandler
-    ) -> AsyncCallable[[str], Any]:
+    ) -> Callable[[str], Awaitable[Any]]:
         """This validator ensures that the passed in value does not get bound.
 
         Args:

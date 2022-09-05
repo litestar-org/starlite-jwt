@@ -9,11 +9,10 @@ from starlite import (
 from starlite_jwt.token import Token
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import Any
+    from typing import Any, Awaitable, Callable
 
     from starlette.requests import HTTPConnection
     from starlette.types import ASGIApp
-    from starlite.utils import AsyncCallable
 
 
 class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
@@ -22,7 +21,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         algorithm: str,
         app: "ASGIApp",
         auth_header: str,
-        retrieve_user_handler: "AsyncCallable[[str], Any]",
+        retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
         token_secret: str,
         exclude: Optional[Union[str, List[str]]],
     ):
