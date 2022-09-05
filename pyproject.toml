@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "starlite-jwt"
-version = "1.1.1"
+version = "1.2.0"
 description = "A JWT auth toolkit for Starlite"
 authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 maintainers = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>", "Peter Schutt <peter.github@proton.me>", "Cody Fincher <cody.fincher@gmail.com>"]
@@ -33,7 +33,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
-starlite = ">=1.14.1"
+starlite = ">=1.16.0"
 python-jose = "*"
 cryptography = "*"
 
@@ -64,9 +64,9 @@ max-args = 7
 [tool.pylint.MESSAGE_CONTROL]
 disable = [
     "line-too-long",
-    "missing-module-docstring",
     "missing-class-docstring",
-
+    "missing-module-docstring",
+    "too-few-public-methods",
 ]
 enable = "useless-suppression"
 extension-pkg-allow-list = ["pydantic"]

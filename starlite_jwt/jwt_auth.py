@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, List, Optional, Union
+from typing import Any, Awaitable, Callable, List, Optional, Union
 
-from pydantic import BaseConfig, BaseModel
+from pydantic import BaseConfig, BaseModel, validator
 from pydantic_openapi_schema.v3_1_0 import (
     Components,
     SecurityRequirement,
@@ -10,10 +10,15 @@ from pydantic_openapi_schema.v3_1_0 import (
 from starlette.status import HTTP_201_CREATED
 from starlite import DefineMiddleware, Response
 from starlite.enums import MediaType
+from starlite.utils import AsyncCallable
 
 from starlite_jwt.middleware import JWTAuthenticationMiddleware
 from starlite_jwt.token import Token
-from starlite_jwt.types import RetrieveUserHandler
+
+RetrieveUserHandler = Union[
+    Callable[[str], Any],
+    Callable[[str], Awaitable[Any]],
+]
 
 
 class JWTAuth(BaseModel):
@@ -63,6 +68,20 @@ class JWTAuth(BaseModel):
     """
     The value to use for the OpenAPI security scheme and security requirements
     """
+
+    @validator("retrieve_user_handler")
+    def validate_retrieve_user_handler(  # pylint: disable=no-self-argument
+        cls, value: RetrieveUserHandler
+    ) -> Callable[[str], Awaitable[Any]]:
+        """This validator ensures that the passed in value does not get bound.
+
+        Args:
+            value: A callable fulfilling the RetrieveUserHandler type.
+
+        Returns:
+            An instance of AsyncCallable wrapping the callable.
+        """
+        return AsyncCallable(value)
 
     @property
     def openapi_components(self) -> Components:
