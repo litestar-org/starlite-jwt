@@ -79,6 +79,9 @@ async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
 jwt_auth = JWTAuth(
     retrieve_user_handler=retrieve_user_handler,
     token_secret=os.environ.get("JWT_SECRET", "abcd123"),
+    # we are specifying which endpoints should be excluded from authentication. In this case the login endpoint
+    # and our openAPI docs.
+    exclude=["/login", "/schema"],
 )
 
 

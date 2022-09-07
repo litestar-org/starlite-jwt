@@ -27,7 +27,11 @@ This library offers simple JWT authentication for [Starlite](https://github.com/
 pip install starlite-jwt
 ```
 
-This library uses the excellent [python-jose](https://github.com/mpdavis/python-jose) library with the [pyca/cryptography](http://cryptography.io/) backend - please refer to the [python-jose](https://github.com/mpdavis/python-jose) readme for more details.
+This library uses the excellent [python-jose](https://github.com/mpdavis/python-jose) library, which supports multiple
+cryptographic backends. You can install either [pyca/cryptography](http://cryptography.io/)
+or [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/), and it will be used as the backend automatically. Note
+that if you want to use a certificate based encryption scheme, you must install one of these backends - please refer to
+the [python-jose](https://github.com/mpdavis/python-jose) readme for more details.
 
 ## Example
 
@@ -73,6 +77,9 @@ async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
 jwt_auth = JWTAuth(
     retrieve_user_handler=retrieve_user_handler,
     token_secret=os.environ.get("JWT_SECRET", "abcd123"),
+    # we are specifying which endpoints should be excluded from authentication. In this case the login endpoint
+    # and our openAPI docs.
+    exclude=["/login", "/schema"],
 )
 
 
@@ -103,10 +110,10 @@ def some_route_handler(request: Request[User, Token]) -> Any:
 
 # We add the jwt security schema to the OpenAPI config.
 openapi_config = OpenAPIConfig(
+    title="My API",
+    version="1.0.0",
     components=[jwt_auth.openapi_components],
     security=[jwt_auth.security_requirement],
-    # exclude any URLs that should not have authentication.  We exclude the documentation URLs here.
-    exclude=["/schema"],
 )
 
 # We initialize the app instance, passing to it the 'jwt_auth.middleware' and the 'openapi_config'.
@@ -119,8 +126,8 @@ app = Starlite(
 
 ## Contributing
 
-Starlite and all its official libraries are open to contributions big and small.
+Starlite and all its official libraries is open to contributions big and small.
 
 You can always [join our discord](https://discord.gg/X3FJqy8d2j) server
 or [join our Matrix](https://matrix.to/#/#starlitespace:matrix.org) space to discuss contributions and project
-maintenance. For guidelines on how to contribute to this library, please see `CONTRIBUTING.md` in the repository's root.
+maintenance. For guidelines on how to contribute to this library, please see [the contribution guide](CONTRIBUTING.md).
