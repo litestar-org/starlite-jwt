@@ -72,7 +72,7 @@ async def test_jwt_auth(
 
     @get("/login")
     def login_handler() -> Response["User"]:
-        response = jwt_auth.login(
+        return jwt_auth.login(
             identifier=str(user.id),
             response_body=user,
             response_status_code=response_status_code,
@@ -81,7 +81,6 @@ async def test_jwt_auth(
             token_audience=token_audience,
             token_unique_jwt_id=token_unique_jwt_id,
         )
-        return response
 
     with create_test_client(route_handlers=[my_handler, login_handler]) as client:
         response = client.get("/login")

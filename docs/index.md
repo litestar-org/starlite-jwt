@@ -29,7 +29,8 @@ pip install starlite-jwt
 
 This library uses the excellent [python-jose](https://github.com/mpdavis/python-jose) library, which supports multiple
 cryptographic backends. You can install either [pyca/cryptography](http://cryptography.io/)
-or [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/), and it will be used as the backend automatically. Note
+or [pycryptodome](https://pycryptodome.readthedocs.io/en/latest/), and it will be used as the backend automatically.
+Note
 that if you want to use a certificate based encryption scheme, you must install one of these backends - please refer to
 the [python-jose](https://github.com/mpdavis/python-jose) readme for more details.
 
@@ -130,4 +131,5 @@ Starlite and all its official libraries is open to contributions big and small.
 
 You can always [join our discord](https://discord.gg/X3FJqy8d2j) server
 or [join our Matrix](https://matrix.to/#/#starlitespace:matrix.org) space to discuss contributions and project
-maintenance. For guidelines on how to contribute to this library, please see [the contribution guide](CONTRIBUTING.md).
+maintenance. For guidelines on how to contribute to this library, please see the contribution guide in the repository's
+root.
