@@ -1,12 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, Awaitable, Callable, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
-from pydantic import BaseConfig, BaseModel, validator
-from pydantic_openapi_schema.v3_1_0 import (
-    Components,
-    SecurityRequirement,
-    SecurityScheme,
-)
+from pydantic import AnyUrl, BaseConfig, BaseModel, validator
+from pydantic_openapi_schema.v3_1_0 import Components, SecurityRequirement, SecurityScheme, OAuthFlow, OAuthFlows
 from starlette.status import HTTP_201_CREATED
 from starlite import DefineMiddleware, Response
 from starlite.enums import MediaType
@@ -200,3 +196,59 @@ class JWTAuth(BaseModel):
         encoded_token = token.encode(secret=self.token_secret, algorithm=self.algorithm)
 
         return encoded_token
+
+
+class OAuth2PasswordBearerAuth(JWTAuth):
+    """Basic Oauth2 Schema for Password Bearer Authentication."""
+
+    openapi_security_scheme_name: str = "BearerToken"
+    """
+    The value to use for the OpenAPI security scheme and security requirements
+    """
+    token_url: AnyUrl
+    """
+    The URL for retrieving a new token
+    """
+    scopes: Optional[Dict[str, str]] = {}
+    """Scopes available for the token"""
+
+    @property
+    def oauth_flow(self) -> OAuthFlow:
+        """Creates an OpenAPI OAuth2 flow for the password bearer authentication
+        schema.
+
+        Returns:
+            An [OAuthFlow][pydantic_schema_pydantic.v3_1_0.oauth_flow.OAuthFlow] instance.
+        """
+        return OAuthFlow(
+            tokenUrl=self.token_url,
+            scopes=self.scopes,
+        )
+
+    @property
+    def openapi_components(self) -> Components:
+        """Creates OpenAPI documentation for the JWT auth schema used.
+
+        Returns:
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
+        """
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="oauth2",
+                    scheme="Bearer",
+                    name=self.auth_header,
+                    flows=OAuthFlows(password=self.oauth_flow),
+                    bearerFormat="JWT",
+                    description="OAUTH2 password bearer authentication and authorization.",
+                )
+            }
+        )
+
+    @property
+    def security_requirement(self) -> SecurityRequirement:
+        """
+        Returns:
+            An OpenAPI 3.1 [SecurityRequirement][pydantic_schema_pydantic.v3_1_0.security_requirement.SecurityRequirement] dictionary.
+        """
+        return {self.openapi_security_scheme_name: []}
