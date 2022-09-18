@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
-    def __init__(
+    def __init__(  # pylint: disable=[too-many-arguments]
         self,
         algorithm: str,
         app: "ASGIApp",
@@ -41,7 +41,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             algorithm: JWT hashing algorithm to use.
             exclude: A pattern or list of patterns to skip.
         """
-        super().__init__(app=app, exclude=exclude)
+        super().__init__(app=app, exclude=exclude)  # type: ignore
         self.algorithm = algorithm
         self.auth_header = auth_header
         self.auth_cookie = auth_cookie
