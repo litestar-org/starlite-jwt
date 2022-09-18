@@ -21,6 +21,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         algorithm: str,
         app: "ASGIApp",
         auth_header: str,
+        auth_cookie: str,
         retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
         token_secret: str,
         exclude: Optional[Union[str, List[str]]],
@@ -36,12 +37,14 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
                 any arbitrary value.
             token_secret: Secret for decoding the JWT token. This value should be equivalent to the secret used to encode it.
             auth_header: Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
+            auth_cookie: Cookie name from which to retrieve the token. E.g. 'token' or 'accessToken'.
             algorithm: JWT hashing algorithm to use.
             exclude: A pattern or list of patterns to skip.
         """
         super().__init__(app=app, exclude=exclude)
         self.algorithm = algorithm
         self.auth_header = auth_header
+        self.auth_cookie = auth_cookie
         self.retrieve_user_handler = retrieve_user_handler
         self.token_secret = token_secret
 
@@ -58,12 +61,12 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        auth_header = connection.headers.get(self.auth_header)
-        if not auth_header:
-            raise NotAuthorizedException("No JWT token found in request header")
+        encoded_token = coalesce([connection.headers.get(self.auth_header), connection.cookies.get(self.auth_cookie)])
+        if not encoded_token:
+            raise NotAuthorizedException("No JWT token found in request header or cookie")
 
         token = Token.decode(
-            encoded_token=auth_header,
+            encoded_token=encoded_token,
             secret=self.token_secret,
             algorithm=self.algorithm,
         )
@@ -73,3 +76,16 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException()
 
         return AuthenticationResult(user=user, auth=token)
+
+
+def coalesce(iterable: list[Optional[str]], default: str | None = None, pred: "Any" = None) -> str | None:
+    """Returns the first non-null value in the iterable.
+
+    If no true value is found, returns *default*
+
+    If *pred* is not None, returns the first item
+    for which pred(item) is true.
+    """
+    # first_true([a,b,c], x) --> a or b or c or x
+    # first_true([a,b], x, f) --> a if f(a) else b if f(b) else x
+    return next(filter(pred, iterable), default)

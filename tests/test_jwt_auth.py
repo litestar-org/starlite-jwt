@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         ]
     ),
     auth_header=sampled_from(["Authorization", "X-API-Key"]),
+    auth_cookie=sampled_from(["token", "accessToken"]),
     default_token_expiration=timedeltas(min_value=timedelta(seconds=30), max_value=timedelta(weeks=1)),
     token_secret=text(min_size=10),
     response_status_code=integers(min_value=200, max_value=201),
@@ -40,6 +41,7 @@ async def test_jwt_auth(
     mock_db: "SimpleCacheBackend",
     algorithm: str,
     auth_header: str,
+    auth_cookie: str,
     default_token_expiration: timedelta,
     token_secret: str,
     response_status_code: int,
@@ -59,6 +61,7 @@ async def test_jwt_auth(
     jwt_auth = JWTAuth(
         algorithm=algorithm,
         auth_header=auth_header,
+        auth_cookie=auth_cookie,
         default_token_expiration=default_token_expiration,
         token_secret=token_secret,
         retrieve_user_handler=retrieve_user_handler,
@@ -99,7 +102,13 @@ async def test_jwt_auth(
         response = client.get("/my-endpoint", headers={auth_header: encoded_token})
         assert response.status_code == HTTP_200_OK
 
+        response = client.get("/my-endpoint", cookies={auth_cookie: encoded_token})
+        assert response.status_code == HTTP_200_OK
+
         response = client.get("/my-endpoint", headers={auth_header: uuid4().hex})
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+        response = client.get("/my-endpoint", cookies={auth_cookie: uuid4().hex})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
         fake_token = Token(
@@ -113,12 +122,19 @@ async def test_jwt_auth(
         response = client.get("/my-endpoint", headers={auth_header: fake_token})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
+        response = client.get("/my-endpoint", cookies={auth_cookie: fake_token})
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
 
 async def test_path_exclusion() -> None:
     async def retrieve_user_handler(_: str) -> None:
         return None
 
-    jwt_auth = JWTAuth(token_secret="abc123", retrieve_user_handler=retrieve_user_handler, exclude=["north", "south"])
+    jwt_auth = JWTAuth(
+        token_secret="abc123",
+        retrieve_user_handler=retrieve_user_handler,
+        exclude=["north", "south"],
+    )
 
     @get("/north/{value:int}")
     def north_handler(value: int) -> Dict[str, int]:

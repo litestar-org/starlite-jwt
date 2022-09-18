@@ -2,9 +2,15 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, BaseConfig, BaseModel, validator
-from pydantic_openapi_schema.v3_1_0 import Components, SecurityRequirement, SecurityScheme, OAuthFlow, OAuthFlows
+from pydantic_openapi_schema.v3_1_0 import (
+    Components,
+    OAuthFlow,
+    OAuthFlows,
+    SecurityRequirement,
+    SecurityScheme,
+)
 from starlette.status import HTTP_201_CREATED
-from starlite import DefineMiddleware, Response
+from starlite import Cookie, DefineMiddleware, Response
 from starlite.enums import MediaType
 from starlite.utils import AsyncCallable
 
@@ -35,6 +41,10 @@ class JWTAuth(BaseModel):
     auth_header: str = "Authorization"
     """
     Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
+    """
+    auth_cookie: str = "token"
+    """
+    Cookie name from which to retrieve the token. E.g. 'access-token' or 'refresh-token'.
     """
     default_token_expiration: timedelta = timedelta(days=1)
     """
@@ -118,6 +128,7 @@ class JWTAuth(BaseModel):
             JWTAuthenticationMiddleware,
             algorithm=self.algorithm,
             auth_header=self.auth_header,
+            auth_cookie=self.auth_cookie,
             retrieve_user_handler=self.retrieve_user_handler,
             token_secret=self.token_secret,
             exclude=self.exclude,
@@ -161,6 +172,7 @@ class JWTAuth(BaseModel):
         return Response(
             content=response_body,
             headers={self.auth_header: encoded_token},
+            cookies=[Cookie(key=self.auth_cookie, value=encoded_token)],
             media_type=response_media_type,
             status_code=response_status_code,
         )
@@ -214,8 +226,8 @@ class OAuth2PasswordBearerAuth(JWTAuth):
 
     @property
     def oauth_flow(self) -> OAuthFlow:
-        """Creates an OpenAPI OAuth2 flow for the password bearer authentication
-        schema.
+        """Creates an OpenAPI OAuth2 flow for the password bearer
+        authentication schema.
 
         Returns:
             An [OAuthFlow][pydantic_schema_pydantic.v3_1_0.oauth_flow.OAuthFlow] instance.
