@@ -181,6 +181,7 @@ class JWTAuth(BaseModel):
                 Cookie(
                     key=self.auth_cookie,
                     value=encoded_token,
+                    httponly=True,
                     expires=int(
                         (datetime.now(timezone.utc) + (token_expiration or self.default_token_expiration)).timestamp()
                     ),
