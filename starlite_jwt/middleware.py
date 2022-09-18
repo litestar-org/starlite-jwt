@@ -78,7 +78,9 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         return AuthenticationResult(user=user, auth=token)
 
 
-def coalesce(iterable: list[Optional[str]], default: str | None = None, pred: "Any" = None) -> str | None:
+def coalesce(
+    iterable: "List[Optional[str]]", default: "Optional[str]" = None, pred: "Optional[Any]" = None
+) -> "Optional[str]":
     """Returns the first non-null value in the iterable.
 
     If no true value is found, returns *default*
