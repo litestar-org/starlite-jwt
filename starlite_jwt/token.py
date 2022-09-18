@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, Optional, Union
+from typing import Dict, Literal, Optional, Union
 
 from jose import JWSError, JWTError, jwt
 from pydantic import (
@@ -27,6 +27,14 @@ def _normalize_datetime(value: datetime) -> datetime:
     if value.tzinfo is not None:
         value.astimezone(timezone.utc)
     return value.replace(microsecond=0)
+
+
+class CookieOptions(BaseModel):
+    path: str = "/"
+    domain: Optional[str] = None
+    secure: Optional[bool] = None
+    samesite: Literal["lax", "strict", "none"] = "lax"
+    description: Optional[str] = None
 
 
 class Token(BaseModel):

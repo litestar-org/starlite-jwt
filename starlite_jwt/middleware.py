@@ -6,7 +6,7 @@ from starlite import (
     NotAuthorizedException,
 )
 
-from starlite_jwt.token import Token
+from starlite_jwt.token import CookieOptions, Token
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Awaitable, Callable
@@ -22,6 +22,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         app: "ASGIApp",
         auth_header: str,
         auth_cookie: str,
+        auth_cookie_options: CookieOptions,
         retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
         token_secret: str,
         exclude: Optional[Union[str, List[str]]],
@@ -45,6 +46,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         self.algorithm = algorithm
         self.auth_header = auth_header
         self.auth_cookie = auth_cookie
+        self.auth_cookie_options = auth_cookie_options or CookieOptions()
         self.retrieve_user_handler = retrieve_user_handler
         self.token_secret = token_secret
 

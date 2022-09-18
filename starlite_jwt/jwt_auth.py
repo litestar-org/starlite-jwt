@@ -15,7 +15,7 @@ from starlite.enums import MediaType
 from starlite.utils import AsyncCallable
 
 from starlite_jwt.middleware import JWTAuthenticationMiddleware
-from starlite_jwt.token import Token
+from starlite_jwt.token import CookieOptions, Token
 
 RetrieveUserHandler = Union[
     Callable[[str], Any],
@@ -43,6 +43,10 @@ class JWTAuth(BaseModel):
     Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
     """
     auth_cookie: str = "token"
+    """
+    Cookie name from which to retrieve the token. E.g. 'access-token' or 'refresh-token'.
+    """
+    auth_cookie_options: "CookieOptions" = CookieOptions(domain=None, secure=False, samesite="lax")
     """
     Cookie name from which to retrieve the token. E.g. 'access-token' or 'refresh-token'.
     """
@@ -129,6 +133,7 @@ class JWTAuth(BaseModel):
             algorithm=self.algorithm,
             auth_header=self.auth_header,
             auth_cookie=self.auth_cookie,
+            auth_cookie_options=self.auth_cookie_options,
             retrieve_user_handler=self.retrieve_user_handler,
             token_secret=self.token_secret,
             exclude=self.exclude,
@@ -172,7 +177,16 @@ class JWTAuth(BaseModel):
         return Response(
             content=response_body,
             headers={self.auth_header: encoded_token},
-            cookies=[Cookie(key=self.auth_cookie, value=encoded_token)],
+            cookies=[
+                Cookie(
+                    key=self.auth_cookie,
+                    value=encoded_token,
+                    expires=int(
+                        (datetime.now(timezone.utc) + (token_expiration or self.default_token_expiration)).timestamp()
+                    ),
+                    **self.auth_cookie_options.dict(exclude_none=True),
+                )
+            ],
             media_type=response_media_type,
             status_code=response_status_code,
         )
