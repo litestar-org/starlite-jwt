@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, BaseConfig, BaseModel, validator
+from pydantic import BaseConfig, BaseModel, validator
 from pydantic_openapi_schema.v3_1_0 import (
     Components,
     OAuthFlow,
@@ -217,7 +217,7 @@ class OAuth2PasswordBearerAuth(JWTAuth):
     """
     The value to use for the OpenAPI security scheme and security requirements
     """
-    token_url: AnyUrl
+    token_url: str
     """
     The URL for retrieving a new token
     """

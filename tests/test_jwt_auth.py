@@ -10,7 +10,7 @@ from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from starlite import OpenAPIConfig, Request, Response, Starlite, get
 from starlite.testing import create_test_client
 
-from starlite_jwt import JWTAuth, Token
+from starlite_jwt import JWTAuth, OAuth2PasswordBearerAuth, Token
 from tests.conftest import User, UserFactory
 
 if TYPE_CHECKING:
@@ -196,6 +196,52 @@ def test_openapi() -> None:
                     "name": "Authorization",
                     "scheme": "Bearer",
                     "bearerFormat": "JWT",
+                }
+            }
+        },
+        "security": [{"BearerToken": []}],
+    }
+
+
+def test_oauth2_password_bearer() -> None:
+    jwt_auth = OAuth2PasswordBearerAuth(  # nosec
+        token_url="/login", token_secret="abc123", retrieve_user_handler=lambda _: None
+    )
+    assert jwt_auth.openapi_components.dict(exclude_none=True) == {
+        "securitySchemes": {
+            "BearerToken": {
+                "type": "oauth2",
+                "description": "OAUTH2 password bearer authentication and authorization.",
+                "name": "Authorization",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT",
+                "flows": {"password": {"tokenUrl": "/login", "scopes": {}}},
+            }
+        }
+    }
+    assert jwt_auth.security_requirement == {"BearerToken": []}
+
+    openapi_config = OpenAPIConfig(
+        title="my api",
+        version="1.0.0",
+        components=[jwt_auth.openapi_components],
+        security=[jwt_auth.security_requirement],
+    )
+    app = Starlite(route_handlers=[], openapi_config=openapi_config)
+    assert app.openapi_schema.dict(exclude_none=True) == {  # type: ignore
+        "openapi": "3.1.0",
+        "info": {"title": "my api", "version": "1.0.0"},
+        "servers": [{"url": "/"}],
+        "paths": {},
+        "components": {
+            "securitySchemes": {
+                "BearerToken": {
+                    "type": "oauth2",
+                    "description": "OAUTH2 password bearer authentication and authorization.",
+                    "name": "Authorization",
+                    "scheme": "Bearer",
+                    "bearerFormat": "JWT",
+                    "flows": {"password": {"tokenUrl": "/login", "scopes": {}}},
                 }
             }
         },
