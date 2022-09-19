@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional, Union
 
 from jose import JWSError, JWTError, jwt
 from pydantic import (
@@ -13,6 +13,7 @@ from pydantic import (
 )
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
+from typing_extensions import Literal
 
 
 def _normalize_datetime(value: datetime) -> datetime:
