@@ -107,7 +107,7 @@ def test_decode_validation() -> None:
         token.decode(encoded_token=encoded_token, algorithm=algorithm, secret=uuid4().hex)
 
 
-@given(exp=datetimes(max_value=datetime.now(timezone.utc) - timedelta(seconds=10)))
+@given(exp=datetimes(max_value=datetime.now() - timedelta(seconds=1)))
 def test_exp_validation(exp: datetime) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         Token(
@@ -117,11 +117,11 @@ def test_exp_validation(exp: datetime) -> None:
         )
 
 
-@given(iat=datetimes(min_value=datetime.now(timezone.utc) + timedelta(seconds=10)))
+@given(iat=datetimes(min_value=datetime.now() + timedelta(seconds=1)))
 def test_iat_validation(iat: datetime) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         Token(
             sub="123",
             iat=iat,
-            exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
+            exp=(datetime.now(timezone.utc) + timedelta(seconds=120)),
         )
