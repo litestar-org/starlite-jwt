@@ -117,7 +117,7 @@ def test_exp_validation(exp: datetime) -> None:
         )
 
 
-@given(iat=datetimes(min_value=datetime.now() + timedelta(seconds=1)))
+@given(iat=datetimes(min_value=datetime.now() + timedelta(days=1)))
 def test_iat_validation(iat: datetime) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         Token(
