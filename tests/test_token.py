@@ -113,7 +113,7 @@ def test_exp_validation(exp: datetime) -> None:
         Token(
             sub="123",
             exp=exp,
-            iat=(datetime.now() - timedelta(seconds=30)),
+            iat=(datetime.now(timezone.utc) - timedelta(seconds=30)),
         )
 
 
@@ -123,5 +123,5 @@ def test_iat_validation(iat: datetime) -> None:
         Token(
             sub="123",
             iat=iat,
-            exp=(datetime.now() + timedelta(seconds=30)),
+            exp=(datetime.now(timezone.utc) + timedelta(seconds=30)),
         )
