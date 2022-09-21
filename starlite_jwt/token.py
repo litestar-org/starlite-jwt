@@ -13,7 +13,6 @@ from pydantic import (
 )
 from starlite import ImproperlyConfiguredException
 from starlite.exceptions import NotAuthorizedException
-from typing_extensions import Literal
 
 
 def _normalize_datetime(value: datetime) -> datetime:
@@ -28,14 +27,6 @@ def _normalize_datetime(value: datetime) -> datetime:
     if value.tzinfo is not None:
         value.astimezone(timezone.utc)
     return value.replace(microsecond=0)
-
-
-class CookieOptions(BaseModel):
-    path: str = "/"
-    domain: Optional[str] = None
-    secure: Optional[bool] = None
-    samesite: Literal["lax", "strict", "none"] = "lax"
-    description: Optional[str] = None
 
 
 class Token(BaseModel):

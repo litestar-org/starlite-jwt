@@ -311,6 +311,7 @@ def test_oauth2_password_bearer() -> None:
                 "name": "Authorization",
                 "scheme": "Bearer",
                 "bearerFormat": "JWT",
+                "security_scheme_in": "header",
                 "flows": {"password": {"tokenUrl": "/login", "scopes": {}}},
             }
         }
@@ -337,6 +338,7 @@ def test_oauth2_password_bearer() -> None:
                     "name": "Authorization",
                     "scheme": "Bearer",
                     "bearerFormat": "JWT",
+                    "security_scheme_in": "header",
                     "flows": {"password": {"tokenUrl": "/login", "scopes": {}}},
                 }
             }

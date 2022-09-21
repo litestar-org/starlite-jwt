@@ -1,12 +1,13 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
+from pydantic import BaseModel
 from starlite import (
     AbstractAuthenticationMiddleware,
     AuthenticationResult,
     NotAuthorizedException,
 )
 
-from starlite_jwt.token import CookieOptions, Token
+from starlite_jwt.token import Token
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Awaitable, Callable
@@ -59,8 +60,12 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
         encoded_token = connection.headers.get(self.auth_header)
+
         if not encoded_token:
             raise NotAuthorizedException("No JWT token found in request header")
+        return await self._authenticate_request(connection=connection, encoded_token=encoded_token)
+
+    async def _authenticate_request(self, connection: "HTTPConnection", encoded_token: "Any") -> AuthenticationResult:
 
         token = Token.decode(
             encoded_token=encoded_token,
@@ -73,6 +78,14 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException()
 
         return AuthenticationResult(user=user, auth=token)
+
+
+class CookieOptions(BaseModel):
+    path: str = "/"
+    domain: Optional[str] = None
+    secure: Optional[bool] = None
+    samesite: Literal["lax", "strict", "none"] = "lax"
+    description: Optional[str] = None
 
 
 class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
@@ -93,9 +106,10 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         token_secret: str,
         exclude: Optional[Union[str, List[str]]],
     ):
-        """This Class is a Starlite compatible JWT authentication middleware.
+        """This Class is a Starlite compatible JWT authentication middleware
+        with cookie support.
 
-        It checks incoming requests for an encoded token in the auth header specified,
+        It checks incoming requests for an encoded token in the auth header or cookie name specified,
         and if present retrieves the user from persistence using the provided function.
 
         Args:
@@ -105,6 +119,7 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
             token_secret: Secret for decoding the JWT token. This value should be equivalent to the secret used to encode it.
             auth_header: Request header key from which to retrieve the token. E.g. 'Authorization' or 'X-Api-Key'.
             auth_cookie: Cookie name from which to retrieve the token. E.g. 'token' or 'accessToken'.
+            auth_cookie_options:   Cookie configuration options to use when creating cookies for requests.
             algorithm: JWT hashing algorithm to use.
             exclude: A pattern or list of patterns to skip.
         """
@@ -133,33 +148,8 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        encoded_token = coalesce([connection.headers.get(self.auth_header), connection.cookies.get(self.auth_cookie)])
+        encoded_token = connection.headers.get(self.auth_header) or connection.cookies.get(self.auth_cookie)
         if not encoded_token:
-            raise NotAuthorizedException("No JWT token found in request header or cookie")
+            raise NotAuthorizedException("No JWT token found in request header or cookies")
 
-        token = Token.decode(
-            encoded_token=encoded_token,
-            secret=self.token_secret,
-            algorithm=self.algorithm,
-        )
-        user = await self.retrieve_user_handler(token.sub)
-
-        if not user:
-            raise NotAuthorizedException()
-
-        return AuthenticationResult(user=user, auth=token)
-
-
-def coalesce(
-    iterable: "List[Optional[str]]", default: "Optional[str]" = None, pred: "Optional[Any]" = None
-) -> "Optional[str]":
-    """Returns the first non-null value in the iterable.
-
-    If no true value is found, returns *default*
-
-    If *pred* is not None, returns the first item
-    for which pred(item) is true.
-    """
-    # first_true([a,b,c], x) --> a or b or c or x
-    # first_true([a,b], x, f) --> a if f(a) else b if f(b) else x
-    return next(filter(pred, iterable), default)
+        return await self._authenticate_request(connection=connection, encoded_token=encoded_token)

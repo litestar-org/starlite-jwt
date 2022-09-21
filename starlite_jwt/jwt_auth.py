@@ -15,10 +15,11 @@ from starlite.enums import MediaType
 from starlite.utils import AsyncCallable
 
 from starlite_jwt.middleware import (
+    CookieOptions,
     JWTAuthenticationMiddleware,
     JWTCookieAuthenticationMiddleware,
 )
-from starlite_jwt.token import CookieOptions, Token
+from starlite_jwt.token import Token
 
 RetrieveUserHandler = Union[
     Callable[[str], Any],
@@ -210,9 +211,9 @@ class JWTAuth(BaseModel):
 class JWTCookieAuth(JWTAuth):
     """JWT Cookie Authentication Configuration.
 
-    This class is the main entry point to the library, and it includes
-    methods to create the middleware, provide login functionality, and
-    create OpenAPI documentation.
+    This class is an alternate entry point to the library, and it
+    includes all of the functionality of the `JWTAuth` class and adds
+    support for passing JWT tokens `HttpOnly` cookies.
     """
 
     auth_cookie: str = "token"
@@ -221,12 +222,12 @@ class JWTCookieAuth(JWTAuth):
     """
     auth_cookie_options: "CookieOptions" = CookieOptions(domain=None, secure=False, samesite="lax")
     """
-    Cookie name from which to retrieve the token. E.g. 'access-token' or 'refresh-token'.
+    Cookie configuration options to use when creating cookies for requests
     """
 
     @property
     def openapi_components(self) -> Components:
-        """Creates OpenAPI documentation for the JWT auth schema used.
+        """Creates OpenAPI documentation for the JWT Cookie auth scheme.
 
         Returns:
             An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
@@ -236,24 +237,17 @@ class JWTCookieAuth(JWTAuth):
                 self.openapi_security_scheme_name: SecurityScheme(
                     type="http",
                     scheme="Bearer",
-                    name=self.auth_header,
+                    name=self.auth_cookie,
+                    security_scheme_in="cookie",
                     bearerFormat="JWT",
-                    description="JWT api-key authentication and authorization.",
+                    description="JWT cookie-based authentication and authorization.",
                 )
             }
         )
 
     @property
-    def security_requirement(self) -> SecurityRequirement:
-        """
-        Returns:
-            An OpenAPI 3.1 [SecurityRequirement][pydantic_schema_pydantic.v3_1_0.security_requirement.SecurityRequirement] dictionary.
-        """
-        return {self.openapi_security_scheme_name: []}
-
-    @property
     def middleware(self) -> DefineMiddleware:
-        """Creates `JWTAuthenticationMiddleware` wrapped in Starlite's
+        """Creates `JWTCookieAuthenticationMiddleware` wrapped in Starlite's
         `DefineMiddleware`.
 
         Returns:
@@ -325,23 +319,26 @@ class JWTCookieAuth(JWTAuth):
 
 
 class OAuth2PasswordBearerAuth(JWTCookieAuth):
-    """Basic Oauth2 Schema for Password Bearer Authentication."""
+    """OAUTH2 Schema for Password Bearer Authentication.
 
-    openapi_security_scheme_name: str = "BearerToken"
+    This class implements an OAUTH2 authentication flow entry point to the library, and it
+    includes all of the functionality of the `JWTAuth` class and adds
+    support for passing JWT tokens `HttpOnly` cookies.
+
+    `token_url` is the only additional required argument and should point your login route
     """
-    The value to use for the OpenAPI security scheme and security requirements
-    """
+
     token_url: str
     """
-    The URL for retrieving a new token
+    The URL for retrieving a new token.
     """
     scopes: Optional[Dict[str, str]] = {}
-    """Scopes available for the token"""
+    """Scopes available for the token."""
 
     @property
     def oauth_flow(self) -> OAuthFlow:
         """Creates an OpenAPI OAuth2 flow for the password bearer
-        authentication schema.
+        authentication scheme.
 
         Returns:
             An [OAuthFlow][pydantic_schema_pydantic.v3_1_0.oauth_flow.OAuthFlow] instance.
@@ -353,7 +350,8 @@ class OAuth2PasswordBearerAuth(JWTCookieAuth):
 
     @property
     def openapi_components(self) -> Components:
-        """Creates OpenAPI documentation for the JWT auth schema used.
+        """Creates OpenAPI documentation for the OAUTH2 Password bearer auth
+        scheme.
 
         Returns:
             An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
@@ -364,17 +362,10 @@ class OAuth2PasswordBearerAuth(JWTCookieAuth):
                     type="oauth2",
                     scheme="Bearer",
                     name=self.auth_header,
-                    flows=OAuthFlows(password=self.oauth_flow),
+                    security_scheme_in="header",
+                    flows=OAuthFlows(password=self.oauth_flow),  # pyright: reportGeneralTypeIssues=false
                     bearerFormat="JWT",
                     description="OAUTH2 password bearer authentication and authorization.",
                 )
             }
         )
-
-    @property
-    def security_requirement(self) -> SecurityRequirement:
-        """
-        Returns:
-            An OpenAPI 3.1 [SecurityRequirement][pydantic_schema_pydantic.v3_1_0.security_requirement.SecurityRequirement] dictionary.
-        """
-        return {self.openapi_security_scheme_name: []}
