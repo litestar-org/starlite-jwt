@@ -67,6 +67,7 @@ disable = [
     "missing-class-docstring",
     "missing-module-docstring",
     "too-few-public-methods",
+    "too-many-arguments"
 ]
 enable = "useless-suppression"
 extension-pkg-allow-list = ["pydantic"]

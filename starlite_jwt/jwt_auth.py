@@ -1,18 +1,24 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, Awaitable, Callable, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from pydantic import BaseConfig, BaseModel, validator
 from pydantic_openapi_schema.v3_1_0 import (
     Components,
+    OAuthFlow,
+    OAuthFlows,
     SecurityRequirement,
     SecurityScheme,
 )
 from starlette.status import HTTP_201_CREATED
-from starlite import DefineMiddleware, Response
+from starlite import Cookie, DefineMiddleware, Response
 from starlite.enums import MediaType
 from starlite.utils import AsyncCallable
 
-from starlite_jwt.middleware import JWTAuthenticationMiddleware
+from starlite_jwt.middleware import (
+    CookieOptions,
+    JWTAuthenticationMiddleware,
+    JWTCookieAuthenticationMiddleware,
+)
 from starlite_jwt.token import Token
 
 RetrieveUserHandler = Union[
@@ -200,3 +206,166 @@ class JWTAuth(BaseModel):
         encoded_token = token.encode(secret=self.token_secret, algorithm=self.algorithm)
 
         return encoded_token
+
+
+class JWTCookieAuth(JWTAuth):
+    """JWT Cookie Authentication Configuration.
+
+    This class is an alternate entry point to the library, and it
+    includes all of the functionality of the `JWTAuth` class and adds
+    support for passing JWT tokens `HttpOnly` cookies.
+    """
+
+    auth_cookie: str = "token"
+    """
+    Cookie name from which to retrieve the token. E.g. 'access-token' or 'refresh-token'.
+    """
+    auth_cookie_options: "CookieOptions" = CookieOptions(domain=None, secure=False, samesite="lax")
+    """
+    Cookie configuration options to use when creating cookies for requests
+    """
+
+    @property
+    def openapi_components(self) -> Components:
+        """Creates OpenAPI documentation for the JWT Cookie auth scheme.
+
+        Returns:
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
+        """
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="http",
+                    scheme="Bearer",
+                    name=self.auth_cookie,
+                    security_scheme_in="cookie",
+                    bearerFormat="JWT",
+                    description="JWT cookie-based authentication and authorization.",
+                )
+            }
+        )
+
+    @property
+    def middleware(self) -> DefineMiddleware:
+        """Creates `JWTCookieAuthenticationMiddleware` wrapped in Starlite's
+        `DefineMiddleware`.
+
+        Returns:
+            An instance of [DefineMiddleware][starlite.middleware.base.DefineMiddleware].
+        """
+        return DefineMiddleware(
+            JWTCookieAuthenticationMiddleware,
+            algorithm=self.algorithm,
+            auth_header=self.auth_header,
+            retrieve_user_handler=self.retrieve_user_handler,
+            token_secret=self.token_secret,
+            exclude=self.exclude,
+            auth_cookie=self.auth_cookie,
+            auth_cookie_options=self.auth_cookie_options,
+        )
+
+    def login(
+        self,
+        identifier: str,
+        *,
+        response_body: Optional[Any] = None,
+        response_media_type: Union[str, MediaType] = MediaType.JSON,
+        response_status_code: int = HTTP_201_CREATED,
+        token_expiration: Optional[timedelta] = None,
+        token_issuer: Optional[str] = None,
+        token_audience: Optional[str] = None,
+        token_unique_jwt_id: Optional[str] = None,
+    ) -> Response[Any]:
+        """Create a response with a JWT header. Calls the
+        'JWTAuth.store_token_handler' to persist the token 'sub'.
+
+        Args:
+            identifier: Unique identifier of the token subject. Usually this is a user ID or equivalent kind of value.
+            response_body: An optional response body to send.
+            response_media_type: An optional 'Content-Type'. Defaults to 'application/json'.
+            response_status_code: An optional status code for the response. Defaults to '201 Created'.
+            token_expiration: An optional timedelta for the token expiration.
+            token_issuer: An optional value of the token 'iss' field.
+            token_audience: An optional value for the token 'aud' field.
+            token_unique_jwt_id: An optional value for the token 'jti' field.
+
+        Returns:
+            A [Response][starlite.response.Response] instance.
+        """
+        encoded_token = self.create_token(
+            identifier=identifier,
+            token_expiration=token_expiration,
+            token_issuer=token_issuer,
+            token_audience=token_audience,
+            token_unique_jwt_id=token_unique_jwt_id,
+        )
+        return Response(
+            content=response_body,
+            headers={self.auth_header: encoded_token},
+            cookies=[
+                Cookie(
+                    key=self.auth_cookie,
+                    value=encoded_token,
+                    httponly=True,
+                    expires=int(
+                        (datetime.now(timezone.utc) + (token_expiration or self.default_token_expiration)).timestamp()
+                    ),
+                    **self.auth_cookie_options.dict(exclude_none=True),
+                )
+            ],
+            media_type=response_media_type,
+            status_code=response_status_code,
+        )
+
+
+class OAuth2PasswordBearerAuth(JWTCookieAuth):
+    """OAUTH2 Schema for Password Bearer Authentication.
+
+    This class implements an OAUTH2 authentication flow entry point to the library, and it
+    includes all of the functionality of the `JWTAuth` class and adds
+    support for passing JWT tokens `HttpOnly` cookies.
+
+    `token_url` is the only additional required argument and should point your login route
+    """
+
+    token_url: str
+    """
+    The URL for retrieving a new token.
+    """
+    scopes: Optional[Dict[str, str]] = {}
+    """Scopes available for the token."""
+
+    @property
+    def oauth_flow(self) -> OAuthFlow:
+        """Creates an OpenAPI OAuth2 flow for the password bearer
+        authentication scheme.
+
+        Returns:
+            An [OAuthFlow][pydantic_schema_pydantic.v3_1_0.oauth_flow.OAuthFlow] instance.
+        """
+        return OAuthFlow(
+            tokenUrl=self.token_url,
+            scopes=self.scopes,
+        )
+
+    @property
+    def openapi_components(self) -> Components:
+        """Creates OpenAPI documentation for the OAUTH2 Password bearer auth
+        scheme.
+
+        Returns:
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
+        """
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="oauth2",
+                    scheme="Bearer",
+                    name=self.auth_header,
+                    security_scheme_in="header",
+                    flows=OAuthFlows(password=self.oauth_flow),  # pyright: reportGeneralTypeIssues=false
+                    bearerFormat="JWT",
+                    description="OAUTH2 password bearer authentication and authorization.",
+                )
+            }
+        )

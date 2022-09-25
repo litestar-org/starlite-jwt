@@ -125,6 +125,154 @@ app = Starlite(
 )
 ```
 
+## JWT Cookie authentication
+
+If you'd like to additionally enable JWT auth using HTTP only cookies, you can configure the built in middleware.
+
+```python
+from typing import Optional
+from uuid import UUID
+import os
+from pydantic import BaseModel, EmailStr
+from starlite_jwt import JWTCookieAuth
+
+
+# Let's assume we have a User model that is a pydantic model.
+# This though is not required - we need some sort of user class -
+# but it can be any arbitrary value, e.g. an SQLAlchemy model, a representation of a MongoDB  etc.
+class User(BaseModel):
+    id: UUID
+    name: str
+    email: EmailStr
+
+
+# The JWTAuth package requires a handler callable that takes a unique identifier, and returns the 'User'
+# instance correlating to it.
+#
+# The identifier is the 'sub' key of the JWT, and it usually correlates to a user ID.
+# It can be though any arbitrary value you decide upon - as long as the handler function provided
+# can receive this value and return the model instance for it.
+#
+# Note: The callable can be either sync or async - both will work.
+async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+    # logic here to retrieve the user instance
+    ...
+
+
+# The minimal configuration required for the JWT cookie configuration is the callable for the 'retrieve_user_handler' key, and a string
+# value for the token secret.
+#
+# Important: secrets should never be hardcoded. Its best practice to pass the secret using ENV.
+#
+# Tip: It's also a good idea to use the pydantic settings management functionality
+jwt_auth = JWTCookieAuth(
+    retrieve_user_handler=retrieve_user_handler,
+    token_secret=os.environ.get("JWT_SECRET", "abcd123"),
+    # we are specifying which endpoints should be excluded from authentication. In this case the login endpoint
+    # and our openAPI docs.
+    exclude=["/login", "/schema"],
+    # Tip: We can optionally supply cookie options to the configuration.  Here is an example of enabling the secure cookie option
+    # auth_cookie_options=CookieOptions(secure=True),
+)
+```
+
+## OAUTH2 Password Bearer Flow
+
+It is also possible to configure an OAUTH2 Password Bearer login flow with the included `OAuth2PasswordBearerAuth` class.
+
+```python
+from typing import Optional
+from uuid import UUID, uuid4
+import os
+from pydantic import BaseModel, EmailStr
+from starlite import Response, get, NotAuthorizedException, Body, RequestEncodingType
+from starlite_jwt import OAuth2PasswordBearerAuth
+
+
+# Let's assume we have a User model that is a pydantic model.
+# This though is not required - we need some sort of user class -
+# but it can be any arbitrary value, e.g. an SQLAlchemy model, a representation of a MongoDB  etc.
+class User(BaseModel):
+    id: UUID
+    name: str
+    email: EmailStr
+    password: str
+
+
+# The JWTAuth package requires a handler callable that takes a unique identifier, and returns the 'User'
+# instance correlating to it.
+#
+# The identifier is the 'sub' key of the JWT, and it usually correlates to a user ID.
+# It can be though any arbitrary value you decide upon - as long as the handler function provided
+# can receive this value and return the model instance for it.
+#
+# Note: The callable can be either sync or async - both will work.
+async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+    # logic here to retrieve the user instance
+    ...
+
+
+# The minimal configuration required for the JWT cookie configuration is the callable for the 'retrieve_user_handler' key, a string
+# value for the token secret, and a `token_url` for retrieving an access token.
+#
+# Important: secrets should never be hardcoded. Its best practice to pass the secret using ENV.
+#
+# Tip: It's also a good idea to use the pydantic settings management functionality
+oauth2_auth = OAuth2PasswordBearerAuth(
+    retrieve_user_handler=retrieve_user_handler,
+    token_secret=os.environ.get("JWT_SECRET", "abcd123"),
+    # we are specifying the URL for retrieving a JWT access token
+    token_url="/login",
+    # we are specifying which endpoints should be excluded from authentication. In this case the login endpoint
+    # and our openAPI docs.
+    exclude=["/login", "/schema"],
+)
+
+
+# A basic login form could look like this:
+class UserLogin(BaseModel):
+    """minimum properties required to log in"""
+
+    username: str
+    password: str
+
+
+async def authenticate(username: str, password: str) -> User:
+    """Authenticates a user
+
+    Args:
+        username: User email
+        password: password
+    Returns:
+        User object
+    """
+    user = User(
+        name="Moishe Zuchmir",
+        email="zuchmir@moishe.com",
+        id=uuid4(),
+        password="insecure",
+    )
+    if username == user.email and password == user.password:
+        return user
+    raise NotAuthorizedException
+
+
+@get("/login")
+def login_handler(
+    data: UserLogin = Body(media_type=RequestEncodingType.URL_ENCODED),
+) -> Response[User]:
+    # we have a user instance - probably by retrieving it from persistence using another lib.
+    # what's important for our purposes is to have an identifier:
+    user = await authenticate(data.username, data.password)
+
+    response = oauth2_auth.login(identifier=str(user.id), response_body=user)
+
+    # you can do whatever you want to update the response instance here
+    # e.g. response.set_cookie(...)
+
+    return response
+```
+
 ## Contributing
 
 Starlite and all its official libraries is open to contributions big and small.
