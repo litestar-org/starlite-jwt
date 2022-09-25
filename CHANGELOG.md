@@ -17,3 +17,9 @@
 [1.2.0]
 
 - update implementation for Starlite `1.16.0+` compatibility.
+
+[1.3.0]
+
+- update implementation for Starlite `1.20.0+` compatibility.
+- implements `OAuth2PasswordBearerAuth` as a pre-configured JWT backend.
+- implements `JWTCookieAuth` as an additional JWT backend.
