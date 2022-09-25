@@ -90,11 +90,7 @@ class CookieOptions(BaseModel):
 
 
 class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
-    """JWT Cookie Authentication Middleware.
-
-    Args:
-        JWTCookieAuthenticationMiddleware (_type_): _description_
-    """
+    """JWT Cookie Authentication Middleware."""
 
     def __init__(  # pylint: disable=[too-many-arguments]
         self,
