@@ -32,7 +32,7 @@ tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy 
 
 [[package]]
 name = "certifi"
-version = "2022.9.14"
+version = "2022.9.24"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "dev"
 optional = false
@@ -185,7 +185,7 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "Faker"
-version = "14.2.0"
+version = "14.2.1"
 description = "Faker is a Python package that generates fake data for you."
 category = "main"
 optional = false
@@ -401,6 +401,17 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+
+[[package]]
+name = "picologging"
+version = "0.8.1"
+description = "A fast and lightweight logging library for Python"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+dev = ["black", "pytest", "pytest-cov", "rich"]
 
 [[package]]
 name = "platformdirs"
@@ -652,7 +663,7 @@ pyasn1 = ">=0.1.3"
 
 [[package]]
 name = "setuptools"
-version = "65.3.0"
+version = "65.4.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "dev"
 optional = false
@@ -704,7 +715,7 @@ full = ["itsdangerous", "jinja2", "python-multipart", "pyyaml", "requests"]
 
 [[package]]
 name = "starlite"
-version = "1.20.0"
+version = "1.21.2"
 description = "Light-weight and flexible ASGI API Framework"
 category = "main"
 optional = false
@@ -712,6 +723,7 @@ python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
 orjson = "*"
+picologging = "*"
 pydantic = "*"
 pydantic-factories = "*"
 pydantic-openapi-schema = "*"
@@ -723,8 +735,7 @@ typing-extensions = "*"
 [package.extras]
 brotli = ["brotli"]
 cryptography = ["cryptography"]
-full = ["brotli", "cryptography", "picologging", "requests"]
-picologging = ["picologging"]
+full = ["brotli", "cryptography", "requests"]
 testing = ["requests"]
 
 [[package]]
@@ -839,8 +850,8 @@ attrs = [
     {file = "attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
 ]
 certifi = [
-    {file = "certifi-2022.9.14-py3-none-any.whl", hash = "sha256:e232343de1ab72c2aa521b625c80f699e356830fd0e2c620b465b304b17b0516"},
-    {file = "certifi-2022.9.14.tar.gz", hash = "sha256:36973885b9542e6bd01dea287b2b4b3b21236307c56324fcc3f1160f2d655ed5"},
+    {file = "certifi-2022.9.24-py3-none-any.whl", hash = "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"},
+    {file = "certifi-2022.9.24.tar.gz", hash = "sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14"},
 ]
 cffi = [
     {file = "cffi-1.15.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:a66d3508133af6e8548451b25058d5812812ec3798c886bf38ed24a98216fab2"},
@@ -1025,8 +1036,8 @@ exceptiongroup = [
     {file = "exceptiongroup-1.0.0rc9.tar.gz", hash = "sha256:9086a4a21ef9b31c72181c77c040a074ba0889ee56a7b289ff0afb0d97655f96"},
 ]
 Faker = [
-    {file = "Faker-14.2.0-py3-none-any.whl", hash = "sha256:e02c55a5b0586caaf913cc6c254b3de178e08b031c5922e590fd033ebbdbfd02"},
-    {file = "Faker-14.2.0.tar.gz", hash = "sha256:6db56e2c43a2b74250d1c332ef25fef7dc07dcb6c5fab5329dd7b4467b8ed7b9"},
+    {file = "Faker-14.2.1-py3-none-any.whl", hash = "sha256:2e28aaea60456857d4ce95dd12aed767769537ad23d13d51a545cd40a654e9d9"},
+    {file = "Faker-14.2.1.tar.gz", hash = "sha256:daad7badb4fd916bd047b28c8459ef4689e4fe6acf61f6dfebee8cc602e4d009"},
 ]
 filelock = [
     {file = "filelock-3.8.0-py3-none-any.whl", hash = "sha256:617eb4e5eedc82fc5f47b6d61e4d11cb837c56cb4544e39081099fa17ad109d4"},
@@ -1169,6 +1180,38 @@ orjson = [
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
+]
+picologging = [
+    {file = "picologging-0.8.1-cp310-cp310-macosx_10_15_universal2.whl", hash = "sha256:262afe4b6189a2c84db8a0b43255ea44288b3a86caa1f2c997fd79b899882c9d"},
+    {file = "picologging-0.8.1-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:d6f7e80c7036b0d101c61c963089127fe777147d191dcbb6554d17532137fdc0"},
+    {file = "picologging-0.8.1-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8ad5edd2f74432c5520b22dcf3dd18f5c99c6319452d326c3e4c2d2a9e77431a"},
+    {file = "picologging-0.8.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c6fd92dd034e19fd9f34af5442a4c3d56876427c8efaeb70bbe1fd60e5e45fbf"},
+    {file = "picologging-0.8.1-cp310-cp310-win32.whl", hash = "sha256:c17351e6fe9bbd1c646105a88e2b54529c85f756c369d3bb030e07dac2ca31ce"},
+    {file = "picologging-0.8.1-cp310-cp310-win_amd64.whl", hash = "sha256:b7e12162ec7c62bac42c2cfafaee73d787ee3006d37425431bc85eae18324c92"},
+    {file = "picologging-0.8.1-cp311-cp311-macosx_10_15_universal2.whl", hash = "sha256:f76ab45250ea48a5bd8c8f78dc60b6268deca643f3e4d0880a161f96c39b4901"},
+    {file = "picologging-0.8.1-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:aa4278eb5dedc6e34004dd8bf1dec30fac36c89c5730ae46b024a0c6b73792df"},
+    {file = "picologging-0.8.1-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9470c0ed2c5cb1bb46ed3c25b678ff92c3c7a3072c61451879d85442cdb30e26"},
+    {file = "picologging-0.8.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:625626f283c9c5c17baeb32c1722a048d630cce43cbb064baa16ec192b1a485e"},
+    {file = "picologging-0.8.1-cp311-cp311-win32.whl", hash = "sha256:07ebb45bcc9e4cf59abf902faf408ccab5217eb6e6c0f270bbc055481f9590de"},
+    {file = "picologging-0.8.1-cp311-cp311-win_amd64.whl", hash = "sha256:05b267a0979b4b6fa21ad33a8e9194b72808653fb4785c6682ec9fa958ab9c02"},
+    {file = "picologging-0.8.1-cp37-cp37m-macosx_10_15_x86_64.whl", hash = "sha256:307b5e3a8740e1bfe2872448ca0b0410a159bfba8ddeb46a30d97469801d4703"},
+    {file = "picologging-0.8.1-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:d4e48cde8e4302a13fe64869dcbd158a70d49c22f812f19e9e34aaddc4fbf4fa"},
+    {file = "picologging-0.8.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:281f4bff6ec169fe21faa63576b80219471822541fb8e6072f03e231c97c8489"},
+    {file = "picologging-0.8.1-cp37-cp37m-win32.whl", hash = "sha256:392e5823d38531cf6c516ddaaf2d7ffee8640ae5783039401899352048a90a41"},
+    {file = "picologging-0.8.1-cp37-cp37m-win_amd64.whl", hash = "sha256:3b7c3084cbb56a33d20b32ad1f4b7eb1f7bc07f4a737b98c2f374c635a11f0b6"},
+    {file = "picologging-0.8.1-cp38-cp38-macosx_10_15_universal2.whl", hash = "sha256:a99f94e5ef0e05123a9dfd56979fcb0ef87ef307e5d6955781a7d5af3aae332d"},
+    {file = "picologging-0.8.1-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:2ea4226d1dad2ad1a7206b23e1969a9593fe47fbd8e3e74c76d59ebe58c2679e"},
+    {file = "picologging-0.8.1-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f20a93feedaa4617258215444946a3f7ea768465536eeea2172b4754b4d08bb1"},
+    {file = "picologging-0.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8b25d97b9d94e78f181319f39f25b34f4907ab420df9f8efafae8432e174c576"},
+    {file = "picologging-0.8.1-cp38-cp38-win32.whl", hash = "sha256:04f6cd30441300798b3d20353acba554c51488097b523ff1dff33c689c3e5dde"},
+    {file = "picologging-0.8.1-cp38-cp38-win_amd64.whl", hash = "sha256:ea507fd1f7c71e9da9484ab234ea4613979abf994c59602d64640fced81d994f"},
+    {file = "picologging-0.8.1-cp39-cp39-macosx_10_15_universal2.whl", hash = "sha256:1c5993c9d219f9c4c6bf8ab9091db4e15d6dfb484cdada7d939ea7902a7b0575"},
+    {file = "picologging-0.8.1-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:41ff34882e1358a8d6606701394cfceca8b810ce5b289d37229219cacde8bd29"},
+    {file = "picologging-0.8.1-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:bf77b97df9f3a2b754f5237ea96c92fa6b4f703c881f9ffad275b7832b4aa7ac"},
+    {file = "picologging-0.8.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:74933bf930b60904ef66b7b4b695952ca86442c023dcf9917ea63a124de22fa2"},
+    {file = "picologging-0.8.1-cp39-cp39-win32.whl", hash = "sha256:0662cee1a580cbc92c709a703e8be09642c04b1ccd06e22a70af206f571f51c3"},
+    {file = "picologging-0.8.1-cp39-cp39-win_amd64.whl", hash = "sha256:176f2b87e3638b100cde401de64e4886293f3cc2937af805d0b15669561baedb"},
+    {file = "picologging-0.8.1.tar.gz", hash = "sha256:c0e263937a7fad3d3ec91c2311356f7ff699f605e960fac3eae409ff5b2f330a"},
 ]
 platformdirs = [
     {file = "platformdirs-2.5.2-py3-none-any.whl", hash = "sha256:027d8e83a2d7de06bbac4e5ef7e023c02b863d7ea5d079477e722bb41ab25788"},
@@ -1323,8 +1366,8 @@ rsa = [
     {file = "rsa-4.9.tar.gz", hash = "sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21"},
 ]
 setuptools = [
-    {file = "setuptools-65.3.0-py3-none-any.whl", hash = "sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82"},
-    {file = "setuptools-65.3.0.tar.gz", hash = "sha256:7732871f4f7fa58fb6bdcaeadb0161b2bd046c85905dbaa066bdcbcc81953b57"},
+    {file = "setuptools-65.4.0-py3-none-any.whl", hash = "sha256:c2d2709550f15aab6c9110196ea312f468f41cd546bceb24127a1be6fdcaeeb1"},
+    {file = "setuptools-65.4.0.tar.gz", hash = "sha256:a8f6e213b4b0661f590ccf40de95d28a177cd747d098624ad3f69c40287297e9"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
@@ -1343,8 +1386,8 @@ starlette = [
     {file = "starlette-0.20.4.tar.gz", hash = "sha256:42fcf3122f998fefce3e2c5ad7e5edbf0f02cf685d646a83a08d404726af5084"},
 ]
 starlite = [
-    {file = "starlite-1.20.0-py3-none-any.whl", hash = "sha256:daeb81d588f0cf60a9dee202b8284d4707ff2f5a4f4f08178f42f5dff05f93e3"},
-    {file = "starlite-1.20.0.tar.gz", hash = "sha256:c8e12c03954499cb9c6feb46683c16946c659782a35f5af176605ee0de952ca5"},
+    {file = "starlite-1.21.2-py3-none-any.whl", hash = "sha256:5d9b26e682b1f9826637e9b35af1e1775337162541e1ca3fd2eccafa008ed619"},
+    {file = "starlite-1.21.2.tar.gz", hash = "sha256:4dc1545a84f827f240779eca0d724723e597dad3327d6332d189a5fe4785d688"},
 ]
 starlite-multipart = [
     {file = "starlite-multipart-1.1.0.tar.gz", hash = "sha256:bd5b25a614fadc237fe4da60f0c43c5e7d045a523d4e3685237047e1e228da87"},

@@ -14,18 +14,18 @@ if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Awaitable, Callable
 
     from starlette.requests import HTTPConnection
-    from starlette.types import ASGIApp
+    from starlite.types import ASGIApp
 
 
 class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
     def __init__(
         self,
-        algorithm: str,
         app: "ASGIApp",
+        exclude: Optional[Union[str, List[str]]],
+        algorithm: str,
         auth_header: str,
         retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
         token_secret: str,
-        exclude: Optional[Union[str, List[str]]],
     ):
         """This Class is a Starlite compatible JWT authentication middleware.
 
@@ -41,7 +41,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             algorithm: JWT hashing algorithm to use.
             exclude: A pattern or list of patterns to skip.
         """
-        super().__init__(app=app, exclude=exclude)  # type: ignore
+        super().__init__(app=app, exclude=exclude)
         self.algorithm = algorithm
         self.auth_header = auth_header
         self.retrieve_user_handler = retrieve_user_handler
@@ -64,10 +64,21 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
 
         if not encoded_token:
             raise NotAuthorizedException("No JWT token found in request header")
-        return await self._authenticate_request(connection=connection, encoded_token=encoded_token)
+        return await self.authenticate_token(encoded_token=encoded_token)
 
-    async def _authenticate_request(self, connection: "HTTPConnection", encoded_token: "Any") -> AuthenticationResult:
+    async def authenticate_token(self, encoded_token: "Any") -> AuthenticationResult:
+        """Given an encoded JWT token, parse, validate and look up sub within
+        token.
 
+        Args:
+            encoded_token (Any): _description_
+
+        Raises:
+            [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
+
+        Returns:
+            AuthenticationResult: _description_
+        """
         token = Token.decode(
             encoded_token=encoded_token,
             secret=self.token_secret,
@@ -97,14 +108,14 @@ class CookieOptions(BaseModel):
 class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
     def __init__(
         self,
-        algorithm: str,
         app: "ASGIApp",
+        exclude: Optional[Union[str, List[str]]],
+        algorithm: str,
         auth_header: str,
         auth_cookie: str,
         auth_cookie_options: CookieOptions,
         retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
         token_secret: str,
-        exclude: Optional[Union[str, List[str]]],
     ):
         """This Class is a Starlite compatible JWT authentication middleware
         with cookie support.
@@ -152,4 +163,4 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         if not encoded_token:
             raise NotAuthorizedException("No JWT token found in request header or cookies")
 
-        return await self._authenticate_request(connection=connection, encoded_token=encoded_token)
+        return await self.authenticate_token(encoded_token=encoded_token)
