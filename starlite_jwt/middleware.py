@@ -6,6 +6,7 @@ from starlite import (
     AuthenticationResult,
     NotAuthorizedException,
 )
+from starlite.connection import ASGIConnection
 from typing_extensions import Literal
 
 from starlite_jwt.token import Token
@@ -13,7 +14,6 @@ from starlite_jwt.token import Token
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Any, Awaitable, Callable
 
-    from starlette.requests import HTTPConnection
     from starlite.types import ASGIApp
 
 
@@ -47,7 +47,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         self.retrieve_user_handler = retrieve_user_handler
         self.token_secret = token_secret
 
-    async def authenticate_request(self, connection: "HTTPConnection") -> AuthenticationResult:
+    async def authenticate_request(self, connection: "ASGIConnection[Any,Any,Any]") -> AuthenticationResult:
         """Given an HTTP Connection, parse the JWT api key stored in the header
         and retrieve the user correlating to the token from the DB.
 
@@ -146,7 +146,7 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         self.auth_cookie = auth_cookie
         self.auth_cookie_options = auth_cookie_options or CookieOptions()
 
-    async def authenticate_request(self, connection: "HTTPConnection") -> AuthenticationResult:
+    async def authenticate_request(self, connection: "ASGIConnection[Any,Any,Any]") -> AuthenticationResult:
         """Given an HTTP Connection, parse the JWT api key stored in the header
         and retrieve the user correlating to the token from the DB.
 
