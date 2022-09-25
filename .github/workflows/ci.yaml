@@ -40,25 +40,28 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: v1-venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            v1-venv-${{ runner.os }}-${{ matrix.python-version }}
+            v1-venv-${{ runner.os }}
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
       - name: Set pythonpath
         run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
       - name: Test
-        run: poetry run pytest
         if: matrix.python-version != '3.10'
+        run: poetry run pytest
       - name: Test with Coverage
-        run: poetry run pytest --cov=. --cov-report=xml
         if: matrix.python-version == '3.10'
+        run: poetry run pytest tests examples --cov=starlite --cov=examples --cov-report=xml
       - uses: actions/upload-artifact@v3
+        if: matrix.python-version == '3.10'
         with:
           name: coverage-xml
           path: coverage.xml
-        if: matrix.python-version == '3.10'
   sonar:
-    needs: test
+    needs:
+      - test
     if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
     steps:
@@ -69,14 +72,36 @@ jobs:
         with:
           name: coverage-xml
       - name: Fix coverage file for sonarcloud
-        run: sed -i "s/home\/runner\/work\/starlite-jwt\/starlite_jwt/github\/workspace/g" coverage.xml
+        run: sed -i "s/home\/runner\/work\/starlite\/starlite/github\/workspace/g" coverage.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  snyk:
+    needs:
+      - test
+    if: github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk Monitor
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: snyk/actions/python-3.8@master
+        with:
+          command: monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Run Snyk Test
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: snyk/actions/python-3.8@master
+        with:
+          command: test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   codeql:
-    needs: test
+    needs:
+      - test
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -92,6 +117,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: v1-venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            v1-venv-${{ runner.os }}-${{ matrix.python-version }}
+            v1-venv-${{ runner.os }}
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
