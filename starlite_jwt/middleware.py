@@ -83,16 +83,19 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
 
 class CookieOptions(BaseModel):
     path: str = "/"
+    """Path fragment that must exist in the request url for the cookie to be valid. Defaults to '/'."""
     domain: Optional[str] = None
-    secure: Optional[bool] = None
+    """Domain for which the cookie is valid."""
+    secure: bool = False
+    """Https is required for the cookie."""
     samesite: Literal["lax", "strict", "none"] = "lax"
+    """Controls whether or not a cookie is sent with cross-site requests. Defaults to 'lax'."""
     description: Optional[str] = None
+    """Description of the response cookie header for OpenAPI documentation"""
 
 
 class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
-    """JWT Cookie Authentication Middleware."""
-
-    def __init__(  # pylint: disable=[too-many-arguments]
+    def __init__(
         self,
         algorithm: str,
         app: "ASGIApp",
