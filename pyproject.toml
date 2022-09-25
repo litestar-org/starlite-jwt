@@ -36,6 +36,7 @@ python = ">=3.7,<4.0"
 starlite = ">=1.16.0"
 python-jose = "*"
 cryptography = "*"
+httpx = { version = "*", optional = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -45,6 +46,10 @@ requests = "*"
 pre-commit = "*"
 hypothesis = "*"
 mkdocs-gen-files = "*"
+
+[tool.poetry.extras]
+gcp = ["httpx"]
+full = ["httpx" ]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

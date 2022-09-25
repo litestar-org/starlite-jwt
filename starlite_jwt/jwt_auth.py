@@ -59,7 +59,7 @@ class JWTAuth(BaseModel):
     - User can be any arbitrary value,
     - The callable can be sync or async.
     """
-    token_secret: str
+    token_secret: Union[str, Dict[str, str]]
     """
     Key with which to generate the token hash.
 

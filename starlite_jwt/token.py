@@ -107,7 +107,7 @@ class Token(BaseModel):
         except (JWTError, ValidationError) as e:
             raise NotAuthorizedException("Invalid token") from e
 
-    def encode(self, secret: str, algorithm: str) -> str:
+    def encode(self, secret: Union[str, Dict[str, str]], algorithm: str) -> str:
         """Encodes the token instance into a string.
 
         Args:
