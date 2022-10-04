@@ -26,8 +26,8 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         algorithm: str,
         auth_header: str,
         retrieve_user_handler: Union[
-            "AsyncCallable[[str, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
-            "AsyncCallable[[str], Awaitable[Any]]",
+            "AsyncCallable[[Any, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
+            "AsyncCallable[[Any], Awaitable[Any]]",
         ],
         token_secret: str,
     ):
@@ -124,8 +124,8 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         auth_cookie: str,
         auth_cookie_options: CookieOptions,
         retrieve_user_handler: Union[
-            "AsyncCallable[[str, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
-            "AsyncCallable[[str], Awaitable[Any]]",
+            "AsyncCallable[[Any, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
+            "AsyncCallable[[Any], Awaitable[Any]]",
         ],
         token_secret: str,
     ):
