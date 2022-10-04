@@ -1,6 +1,6 @@
 import string
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 from uuid import uuid4
 
 import pytest
@@ -150,8 +150,9 @@ async def test_jwt_cookie_auth(
 
     await mock_db.set(str(user.id), user, 120)
 
-    async def retrieve_user_handler(sub: str) -> Optional["User"]:
+    async def retrieve_user_handler(sub: str, connection: Any) -> Optional["User"]:
         stored_user = await mock_db.get(sub)
+        assert connection
         return stored_user
 
     jwt_auth = JWTCookieAuth(
@@ -192,18 +193,23 @@ async def test_jwt_cookie_auth(
         assert decoded_token.aud == token_audience
         assert decoded_token.jti == token_unique_jwt_id
 
+        client.cookies.clear()
         response = client.get("/my-endpoint")
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", headers={auth_header: encoded_token})
         assert response.status_code == HTTP_200_OK
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", cookies={auth_cookie: encoded_token})
         assert response.status_code == HTTP_200_OK
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", headers={auth_header: uuid4().hex})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", cookies={auth_cookie: uuid4().hex})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
@@ -215,9 +221,11 @@ async def test_jwt_cookie_auth(
             exp=(datetime.now(timezone.utc) + token_expiration),
         ).encode(secret=token_secret, algorithm=algorithm)
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", headers={auth_header: fake_token})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
+        client.cookies.clear()
         response = client.get("/my-endpoint", cookies={auth_cookie: fake_token})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 

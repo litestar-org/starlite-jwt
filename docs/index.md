@@ -181,11 +181,20 @@ jwt_auth = JWTCookieAuth(
 It is also possible to configure an OAUTH2 Password Bearer login flow with the included `OAuth2PasswordBearerAuth` class.
 
 ```python
-from typing import Optional
-from uuid import UUID, uuid4
 import os
+
+from typing import Optional, Any
+from uuid import UUID, uuid4
+
 from pydantic import BaseModel, EmailStr
-from starlite import Response, get, NotAuthorizedException, Body, RequestEncodingType
+from starlite import (
+    Response,
+    ASGIConnection,
+    NotAuthorizedException,
+    Body,
+    RequestEncodingType,
+    get,
+)
 from starlite_jwt import OAuth2PasswordBearerAuth
 
 
@@ -207,7 +216,9 @@ class User(BaseModel):
 # can receive this value and return the model instance for it.
 #
 # Note: The callable can be either sync or async - both will work.
-async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+async def retrieve_user_handler(
+    unique_identifier: str, connection: ASGIConnection[Any, Any, Any]
+) -> Optional[User]:
     # logic here to retrieve the user instance
     ...
 

@@ -43,7 +43,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, EmailStr
-from starlite import OpenAPIConfig, Request, Response, Starlite, get
+from starlite import OpenAPIConfig, Request, Response, ASGIConnection, Starlite, get
 
 from starlite_jwt import JWTAuth, Token
 
@@ -65,7 +65,9 @@ class User(BaseModel):
 # can receive this value and return the model instance for it.
 #
 # Note: The callable can be either sync or async - both will work.
-async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+async def retrieve_user_handler(
+    unique_identifier: str, connection: ASGIConnection[Any, Any, Any]
+) -> Optional[User]:
     # logic here to retrieve the user instance
     ...
 
