@@ -6,6 +6,9 @@
 
 <div align="center">
 
+![PyPI - License](https://img.shields.io/pypi/l/starlite-jwt?color=blue)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/starlite-jwt)
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=starlite-api_jwt-auth&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=starlite-api_jwt-auth)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=starlite-api_jwt-auth&metric=coverage)](https://sonarcloud.io/summary/new_code?id=starlite-api_jwt-auth)
 
