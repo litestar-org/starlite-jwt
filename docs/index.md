@@ -6,6 +6,9 @@
 
 <center>
 
+![PyPI - License](https://img.shields.io/pypi/l/starlite-jwt?color=blue)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/starlite-jwt)
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=starlite-api_jwt-auth&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=starlite-api_jwt-auth)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=starlite-api_jwt-auth&metric=coverage)](https://sonarcloud.io/summary/new_code?id=starlite-api_jwt-auth)
 
@@ -42,7 +45,7 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, EmailStr
-from starlite import OpenAPIConfig, Request, Response, Starlite, get
+from starlite import OpenAPIConfig, Request, Response, Starlite, ASGIConnection, get
 
 from starlite_jwt import JWTAuth, Token
 
@@ -64,7 +67,9 @@ class User(BaseModel):
 # can receive this value and return the model instance for it.
 #
 # Note: The callable can be either sync or async - both will work.
-async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+async def retrieve_user_handler(
+    unique_identifier: str, connection: ASGIConnection[Any, Any, Any]
+) -> Optional[User]:
     # logic here to retrieve the user instance
     ...
 
@@ -130,10 +135,13 @@ app = Starlite(
 If you'd like to additionally enable JWT auth using HTTP only cookies, you can configure the built in middleware.
 
 ```python
-from typing import Optional
-from uuid import UUID
 import os
+
+from typing import Optional, Any
+from uuid import UUID
+
 from pydantic import BaseModel, EmailStr
+from starlite import ASGIConnection
 from starlite_jwt import JWTCookieAuth
 
 
@@ -154,7 +162,9 @@ class User(BaseModel):
 # can receive this value and return the model instance for it.
 #
 # Note: The callable can be either sync or async - both will work.
-async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+async def retrieve_user_handler(
+    unique_identifier: str, connection: ASGIConnection[Any, Any, Any]
+) -> Optional[User]:
     # logic here to retrieve the user instance
     ...
 
@@ -181,11 +191,20 @@ jwt_auth = JWTCookieAuth(
 It is also possible to configure an OAUTH2 Password Bearer login flow with the included `OAuth2PasswordBearerAuth` class.
 
 ```python
-from typing import Optional
-from uuid import UUID, uuid4
 import os
+
+from typing import Optional, Any
+from uuid import UUID, uuid4
+
 from pydantic import BaseModel, EmailStr
-from starlite import Response, get, NotAuthorizedException, Body, RequestEncodingType
+from starlite import (
+    ASGIConnection,
+    Body,
+    NotAuthorizedException,
+    RequestEncodingType,
+    Response,
+    get,
+)
 from starlite_jwt import OAuth2PasswordBearerAuth
 
 
@@ -207,7 +226,9 @@ class User(BaseModel):
 # can receive this value and return the model instance for it.
 #
 # Note: The callable can be either sync or async - both will work.
-async def retrieve_user_handler(unique_identifier: str) -> Optional[User]:
+async def retrieve_user_handler(
+    unique_identifier: str, connection: ASGIConnection[Any, Any, Any]
+) -> Optional[User]:
     # logic here to retrieve the user instance
     ...
 

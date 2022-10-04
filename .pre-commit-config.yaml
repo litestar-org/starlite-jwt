@@ -10,7 +10,7 @@ repos:
         exclude: "\\.idea/(.)*"
       - id: trailing-whitespace
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.38.1
+    rev: v3.0.0
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
@@ -76,6 +76,11 @@ repos:
     rev: v0.4.0
     hooks:
       - id: flake8-markdown
+  - repo: https://github.com/dosisod/refurb
+    rev: v1.2.0
+    hooks:
+      - id: refurb
+        additional_dependencies: [starlite, python-jose, mkdocs_gen_files]
   - repo: https://github.com/pycqa/pylint
     rev: "v2.15.3"
     hooks:
@@ -84,13 +89,13 @@ repos:
         args: ["--unsafe-load-any-extension=y"]
         additional_dependencies: [starlite, python-jose, mkdocs_gen_files]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v0.971"
+    rev: "v0.982"
     hooks:
       - id: mypy
         additional_dependencies:
           [starlite, python-jose, mkdocs_gen_files, types-python-jose]
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.272
+    rev: v1.1.273
     hooks:
       - id: pyright
         additional_dependencies:

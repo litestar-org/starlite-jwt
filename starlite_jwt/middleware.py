@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Awaitable, List, Optional, Union
 
 from pydantic import BaseModel
 from starlite import (
@@ -12,9 +12,10 @@ from typing_extensions import Literal
 from starlite_jwt.token import Token
 
 if TYPE_CHECKING:  # pragma: no cover
-    from typing import Any, Awaitable, Callable
+    from typing import Any
 
     from starlite.types import ASGIApp
+    from starlite.utils import AsyncCallable
 
 
 class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
@@ -24,7 +25,10 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         exclude: Optional[Union[str, List[str]]],
         algorithm: str,
         auth_header: str,
-        retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
+        retrieve_user_handler: Union[
+            "AsyncCallable[[Any, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
+            "AsyncCallable[[Any], Awaitable[Any]]",
+        ],
         token_secret: str,
     ):
         """This Class is a Starlite compatible JWT authentication middleware.
@@ -64,9 +68,11 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
 
         if not encoded_token:
             raise NotAuthorizedException("No JWT token found in request header")
-        return await self.authenticate_token(encoded_token=encoded_token)
+        return await self.authenticate_token(encoded_token=encoded_token, connection=connection)
 
-    async def authenticate_token(self, encoded_token: "Any") -> AuthenticationResult:
+    async def authenticate_token(
+        self, encoded_token: "Any", connection: "ASGIConnection[Any, Any, Any]"
+    ) -> AuthenticationResult:
         """Given an encoded JWT token, parse, validate and look up sub within
         token.
 
@@ -84,7 +90,10 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             secret=self.token_secret,
             algorithm=self.algorithm,
         )
-        user = await self.retrieve_user_handler(token.sub)
+        if self.retrieve_user_handler.num_expected_args == 2:
+            user = await self.retrieve_user_handler(token.sub, connection)  # type: ignore[call-arg]
+        else:
+            user = await self.retrieve_user_handler(token.sub)  # type: ignore[call-arg]
 
         if not user:
             raise NotAuthorizedException()
@@ -114,7 +123,10 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         auth_header: str,
         auth_cookie: str,
         auth_cookie_options: CookieOptions,
-        retrieve_user_handler: "Callable[[str], Awaitable[Any]]",
+        retrieve_user_handler: Union[
+            "AsyncCallable[[Any, ASGIConnection[Any, Any, Any]], Awaitable[Any]]",
+            "AsyncCallable[[Any], Awaitable[Any]]",
+        ],
         token_secret: str,
     ):
         """This Class is a Starlite compatible JWT authentication middleware
@@ -163,4 +175,4 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         if not encoded_token:
             raise NotAuthorizedException("No JWT token found in request header or cookies")
 
-        return await self.authenticate_token(encoded_token=encoded_token)
+        return await self.authenticate_token(encoded_token=encoded_token, connection=connection)

@@ -6,9 +6,9 @@
 
 [1.1.0]
 
+- add `cryptography` as `python-jose` backend
 - update `jwt-auth` to have `openapi_components` and `security_requirements` properties that can be used for OpenAPI 3.1 docs generation.
-- Use `cryptography` as `python-jose` backend
-- Adjustments to `Token` model.
+- update to `Token` model.
 
 [1.1.1]
 
@@ -20,6 +20,12 @@
 
 [1.3.0]
 
+- add `JWTCookieAuth` as an additional JWT backend.
+- add `OAuth2PasswordBearerAuth` as a pre-configured JWT backend.
 - update implementation for Starlite `1.20.0+` compatibility.
-- implements `OAuth2PasswordBearerAuth` as a pre-configured JWT backend.
-- implements `JWTCookieAuth` as an additional JWT backend.
+
+[1.4.0]
+
+- add Python `3.11` support.
+- require Starlite `>=1.24.0`.
+- update `RetrieveUserHandler` to support accepting the `connection` as an arg.
