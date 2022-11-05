@@ -141,26 +141,28 @@ If you wanted your authentication header to be `Token {encoded_token}`, you coul
 
 ```python
 from pydantic_openapi_schema.v3_1_0 import Components, SecurityScheme
+from starlite_jwt import JWTAuth
 
 
-@property
-def openapi_components(self) -> Components:
-    """Creates OpenAPI documentation for the JWT auth schema used.
+class CustomJWTAuth(JWTAuth):
+    @property
+    def openapi_components(self) -> Components:
+        """Creates OpenAPI documentation for the JWT auth schema used.
 
-    Returns:
-        An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
-    """
-    return Components(
-        securitySchemes={
-            self.openapi_security_scheme_name: SecurityScheme(
-                type="http",
-                scheme="Token",
-                name=self.auth_header,
-                bearerFormat="JWT",
-                description="JWT api-key authentication and authorization.",
-            )
-        }
-    )
+        Returns:
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
+        """
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="http",
+                    scheme="Token",
+                    name=self.auth_header,
+                    bearerFormat="JWT",
+                    description="JWT api-key authentication and authorization.",
+                )
+            }
+        )
 ```
 
 ## Contributing
