@@ -96,7 +96,7 @@ async def test_jwt_auth(
         response = client.get("/my-endpoint")
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
-        response = client.get("/my-endpoint", headers={auth_header: jwt_auth.format_auth_header(fake_token)})
+        response = client.get("/my-endpoint", headers={auth_header: jwt_auth.format_auth_header(encoded_token)})
         assert response.status_code == HTTP_200_OK
 
         response = client.get("/my-endpoint", headers={auth_header: uuid4().hex})
@@ -110,7 +110,7 @@ async def test_jwt_auth(
             exp=(datetime.now(timezone.utc) + token_expiration),
         ).encode(secret=token_secret, algorithm=algorithm)
 
-        response = client.get("/my-endpoint", headers={auth_header: jwt_auth._prepend_security_scheme_name(fake_token)})
+        response = client.get("/my-endpoint", headers={auth_header: jwt_auth.format_auth_header(fake_token)})
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
 
