@@ -29,3 +29,7 @@
 - add Python `3.11` support.
 - require Starlite `>=1.24.0`.
 - update `RetrieveUserHandler` to support accepting the `connection` as an arg.
+
+[1.4.1]
+
+- updated authentication header and cookie to include the security scheme prefixed to the JWT token

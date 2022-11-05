@@ -131,6 +131,40 @@ app = Starlite(
 )
 ```
 
+## Customization
+
+This integrates with the OpenAPI configuration of Starlite, and it uses the `SecurityScheme` configuration to format the header and/or cookie value.
+
+The default implementation follows the `Bearer {encoded_token}` format, but you may optionally override this configuration by modifying the openapi_component attribute of your `JWTAuth` instance.
+
+If you wanted your authentication header to be `Token {encoded_token}`, you could use the following as your security scheme configuration:
+
+```python
+from pydantic_openapi_schema.v3_1_0 import Components, SecurityScheme
+from starlite_jwt import JWTAuth
+
+
+class CustomJWTAuth(JWTAuth):
+    @property
+    def openapi_components(self) -> Components:
+        """Creates OpenAPI documentation for the JWT auth schema used.
+
+        Returns:
+            An [Components][pydantic_schema_pydantic.v3_1_0.components.Components] instance.
+        """
+        return Components(
+            securitySchemes={
+                self.openapi_security_scheme_name: SecurityScheme(
+                    type="http",
+                    scheme="Token",
+                    name=self.auth_header,
+                    bearerFormat="JWT",
+                    description="JWT api-key authentication and authorization.",
+                )
+            }
+        )
+```
+
 ## Contributing
 
 Starlite and all its official libraries is open to contributions big and small.

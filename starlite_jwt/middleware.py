@@ -64,10 +64,10 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        encoded_token = connection.headers.get(self.auth_header)
-
-        if not encoded_token:
+        auth_header = connection.headers.get(self.auth_header)
+        if not auth_header:
             raise NotAuthorizedException("No JWT token found in request header")
+        _, _, encoded_token = auth_header.partition(" ")
         return await self.authenticate_token(encoded_token=encoded_token, connection=connection)
 
     async def authenticate_token(
@@ -171,8 +171,8 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        encoded_token = connection.headers.get(self.auth_header) or connection.cookies.get(self.auth_cookie)
-        if not encoded_token:
+        auth_header = connection.headers.get(self.auth_header) or connection.cookies.get(self.auth_cookie)
+        if not auth_header:
             raise NotAuthorizedException("No JWT token found in request header or cookies")
-
+        _, _, encoded_token = auth_header.partition(" ")
         return await self.authenticate_token(encoded_token=encoded_token, connection=connection)
