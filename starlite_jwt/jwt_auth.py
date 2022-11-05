@@ -170,7 +170,7 @@ class JWTAuth(BaseModel):
         )
         return Response(
             content=response_body,
-            headers={self.auth_header: self._prepend_security_scheme_name(encoded_token)},
+            headers={self.auth_header: self.format_auth_header(encoded_token)},
             media_type=response_media_type,
             status_code=response_status_code,
         )
@@ -207,7 +207,7 @@ class JWTAuth(BaseModel):
 
         return encoded_token
 
-    def _prepend_security_scheme_name(self, encoded_token: str) -> str:
+    def format_auth_header(self, encoded_token: str) -> str:
         """Formats a token according to the specified OpenAPI scheme
 
         Args:
@@ -316,11 +316,11 @@ class JWTCookieAuth(JWTAuth):
         )
         return Response(
             content=response_body,
-            headers={self.auth_header: self._prepend_security_scheme_name(encoded_token)},
+            headers={self.auth_header: self.format_auth_header(encoded_token)},
             cookies=[
                 Cookie(
                     key=self.auth_cookie,
-                    value=self._prepend_security_scheme_name(encoded_token),
+                    value=self.format_auth_header(encoded_token),
                     httponly=True,
                     expires=int(
                         (datetime.now(timezone.utc) + (token_expiration or self.default_token_expiration)).timestamp()
