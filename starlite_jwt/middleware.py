@@ -64,10 +64,10 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        encoded_token = connection.headers.get(self.auth_header)
-
-        if not encoded_token:
+        auth_header = connection.headers.get(self.auth_header)
+        if not auth_header:
             raise NotAuthorizedException("No JWT token found in request header")
+        encoded_token = self._remove_security_scheme_prefix(auth_header)
         return await self.authenticate_token(encoded_token=encoded_token, connection=connection)
 
     async def authenticate_token(
@@ -99,6 +99,18 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException()
 
         return AuthenticationResult(user=user, auth=token)
+
+    def _remove_security_scheme_prefix(self, encoded_auth_header: str) -> str:
+        """Take the authentication header and returns the JWT token embedded
+
+        Args:
+            encoded_auth_header: An encoded auth header with a valid JWT
+
+        Returns:
+            The encoded JWT token
+        """
+        _, _, encoded_token = encoded_auth_header.partition(" ")
+        return encoded_token
 
 
 class CookieOptions(BaseModel):
@@ -171,8 +183,8 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         Raises:
             [NotAuthorizedException][starlite.exceptions.NotAuthorizedException]: If token is invalid or user is not found.
         """
-        encoded_token = connection.headers.get(self.auth_header) or connection.cookies.get(self.auth_cookie)
-        if not encoded_token:
+        auth_header = connection.headers.get(self.auth_header) or connection.cookies.get(self.auth_cookie)
+        if not auth_header:
             raise NotAuthorizedException("No JWT token found in request header or cookies")
-
+        encoded_token = self._remove_security_scheme_prefix(auth_header)
         return await self.authenticate_token(encoded_token=encoded_token, connection=connection)
