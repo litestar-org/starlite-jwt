@@ -208,7 +208,7 @@ class JWTAuth(BaseModel):
         return encoded_token
 
     def format_auth_header(self, encoded_token: str) -> str:
-        """Formats a token according to the specified OpenAPI scheme
+        """Formats a token according to the specified OpenAPI scheme.
 
         Args:
             token: An encoded JWT token
