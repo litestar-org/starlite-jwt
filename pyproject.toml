@@ -39,7 +39,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4.0"
+python = ">=3.8,<4.0"
 starlite = ">=1.24.0"
 python-jose = "*"
 cryptography = "*"

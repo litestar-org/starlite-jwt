@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Awaitable, List, Optional, Union
+from typing import TYPE_CHECKING, Awaitable, List, Literal, Optional, Union
 
 from pydantic import BaseModel
 from starlite import (
@@ -7,7 +7,6 @@ from starlite import (
     NotAuthorizedException,
 )
 from starlite.connection import ASGIConnection
-from typing_extensions import Literal
 
 from starlite_jwt.token import Token
 
