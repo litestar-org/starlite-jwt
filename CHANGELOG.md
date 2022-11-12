@@ -33,3 +33,8 @@
 [1.4.1]
 
 - updated authentication header and cookie to include the security scheme prefixed to the JWT token
+
+[1.5.0]
+
+- Updates references to starlette to use starlite
+- remove Python `3.7` support

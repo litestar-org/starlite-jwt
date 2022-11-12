@@ -6,8 +6,8 @@ from uuid import uuid4
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers, none, one_of, sampled_from, text, timedeltas
-from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from starlite import OpenAPIConfig, Request, Response, Starlite, get
+from starlite.status_codes import HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from starlite.testing import create_test_client
 
 from starlite_jwt import JWTAuth, JWTCookieAuth, OAuth2PasswordBearerAuth, Token

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Awaitable, List, Optional, Union
+from typing import TYPE_CHECKING, Awaitable, List, Literal, Optional, Union
 
 from pydantic import BaseModel
 from starlite import (
@@ -7,7 +7,6 @@ from starlite import (
     NotAuthorizedException,
 )
 from starlite.connection import ASGIConnection
-from typing_extensions import Literal
 
 from starlite_jwt.token import Token
 
@@ -56,7 +55,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         and retrieve the user correlating to the token from the DB.
 
         Args:
-            connection: An Starlette HTTPConnection instance.
+            connection: An Starlite HTTPConnection instance.
 
         Returns:
             AuthenticationResult
@@ -163,7 +162,7 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         and retrieve the user correlating to the token from the DB.
 
         Args:
-            connection: An Starlette HTTPConnection instance.
+            connection: An Starlite HTTPConnection instance.
 
         Returns:
             AuthenticationResult

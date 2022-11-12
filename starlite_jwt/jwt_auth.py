@@ -9,9 +9,9 @@ from pydantic_openapi_schema.v3_1_0 import (
     SecurityRequirement,
     SecurityScheme,
 )
-from starlette.status import HTTP_201_CREATED
 from starlite import ASGIConnection, Cookie, DefineMiddleware, Response
 from starlite.enums import MediaType
+from starlite.status_codes import HTTP_201_CREATED
 from starlite.utils import AsyncCallable
 
 from starlite_jwt.middleware import (
