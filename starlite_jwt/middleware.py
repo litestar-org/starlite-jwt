@@ -56,7 +56,7 @@ class JWTAuthenticationMiddleware(AbstractAuthenticationMiddleware):
         and retrieve the user correlating to the token from the DB.
 
         Args:
-            connection: An Starlette HTTPConnection instance.
+            connection: An Starlite HTTPConnection instance.
 
         Returns:
             AuthenticationResult
@@ -163,7 +163,7 @@ class JWTCookieAuthenticationMiddleware(JWTAuthenticationMiddleware):
         and retrieve the user correlating to the token from the DB.
 
         Args:
-            connection: An Starlette HTTPConnection instance.
+            connection: An Starlite HTTPConnection instance.
 
         Returns:
             AuthenticationResult
