@@ -1,5 +1,7 @@
 # Starlite JWT
 
+DEPRECATED: from version `1.43.0` Starlite includes this functionality under `starlite.contrib.jwt` 
+
 <!-- markdownlint-disable -->
 <img alt="Starlite logo" src="./starlite-banner.svg" width="100%" height="auto">
 <!-- markdownlint-restore -->
